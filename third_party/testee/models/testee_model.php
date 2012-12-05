@@ -316,7 +316,7 @@ class Testee_model extends CI_Model {
 		else
 		{
 			$url = (
-				rtrim(ee()->config->item('theme_folder_url'), '/') .
+				rtrim($this->EE->config->item('theme_folder_url'), '/') .
 				'/third_party/'
 			);
 		}
