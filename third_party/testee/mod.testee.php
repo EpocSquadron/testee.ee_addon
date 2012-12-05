@@ -42,9 +42,17 @@ class Testee {
 	 */
 	public function run_tests()
 	{
+		$req_tests = $this->EE->input->get_post('addon');
+
+		if ( $req_tests === FALSE AND REQ == 'PAGE' AND isset($this->EE->TMPL))
+		{
+			$req_tests = $this->EE->TMPL->fetch_param('addon');
+		}
+
 		// Determine the tests to run.
 		$input_tests = array_filter(
-			explode('|', $this->EE->input->get_post('addon')));
+			explode('|', $req_tests)
+		);
 
 		if ( ! $input_tests)
 		{
