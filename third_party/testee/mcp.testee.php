@@ -76,19 +76,20 @@ class Testee_mcp {
 			.'&addon={addon_name}';
 
 		$docs_url = $this->EE->cp->masked_url(
-			'http://exhq.co/software/testee/docs/');
+			'https://github.com/experience/testee.ee_addon/wiki/_pages');
 
 		$vars = array(
-			'action_url'    => $action_url,
-			'form_action'   => $this->_base_qs .AMP .'method=run_test',
-			'cp_page_title' => $this->EE->lang->line('testee_module_name'),
-			'docs_url'      => $docs_url,
-			'tests'         => $this->_model->get_tests()
+			'action_url'	=> $action_url,
+			'form_action'	=> $this->_base_qs .AMP .'method=run_test',
+			'cp_page_title'	=> $this->EE->lang->line('testee_module_name'),
+			'docs_url'		=> $docs_url,
+			'tests'			=> $this->_model->get_tests()
 		);
 
 		return $this->EE->load->view('tests_index', $vars, TRUE);
 	}
 
+	// --------------------------------------------------------------------
 
 	/**
 	 * Handles a 'run_test' request.
@@ -102,8 +103,10 @@ class Testee_mcp {
 
 		try
 		{
-			$test_results = $this->_model->run_tests($test_path,
-				new Testee_cp_reporter());
+			$test_results = $this->_model->run_tests(
+				$test_path,
+				new Testee_cp_reporter()
+			);
 		}
 		catch (Exception $e)
 		{
@@ -112,11 +115,11 @@ class Testee_mcp {
 		}
 
 		$vars = array(
-			'form_action'     => $this->_base_qs .AMP .'method=run_test',
-			'tests_index_url' => $this->_base_url,
-			'cp_page_title'   => 'Testee Test Results',
-			'results'         => $test_results,
-			'tests'           => $test_path
+			'form_action'		=> $this->_base_qs .AMP .'method=run_test',
+			'tests_index_url'	=> $this->_base_url,
+			'cp_page_title'		=> lang('testee_test_results'),
+			'results'			=> $test_results,
+			'tests'				=> $test_path
 		);
 
 		return $this->EE->load->view('test_results', $vars, TRUE);
