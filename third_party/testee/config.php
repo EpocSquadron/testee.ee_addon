@@ -11,14 +11,13 @@
 
 if ( ! defined('TESTEE_NAME'))
 {
-  define('TESTEE_NAME', 'Testee');
-  define('TESTEE_VERSION', '2.2.3');
+	define('TESTEE_NAME', 'Testee');
+	define('TESTEE_VERSION', '2.2.3');
 }
 
-$config['name']     = TESTEE_NAME;
-$config['version']  = TESTEE_VERSION;
-$config['nsm_addon_updater']['versions_xml']
-  = 'http://experienceinternet.co.uk/software/feeds/testee';
+$config['name']		= TESTEE_NAME;
+$config['version']	= TESTEE_VERSION;
+//$config['nsm_addon_updater']['versions_xml'] = '';
 
 /* End of file      : config.php */
 /* File location    : third_party/campaigner/config.php */

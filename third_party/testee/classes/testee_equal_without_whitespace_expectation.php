@@ -11,14 +11,14 @@
 require_once PATH_THIRD .'testee/simpletest/expectation.php';
 
 class EqualWithoutWhitespaceExpectation extends EqualExpectation {
-	
+
 	private $_subject;
-	
-	
+
+
 	/* --------------------------------------------------------------
 	 * PUBLIC METHODS
 	 * ------------------------------------------------------------ */
-	
+
 	/**
 	 * Constructor.
 	 *
@@ -32,8 +32,8 @@ class EqualWithoutWhitespaceExpectation extends EqualExpectation {
 		$this->_subject = $subject;
 		parent::__construct($subject, $message);
 	}
-	
-	
+
+
 	/**
 	 * Tests the expectation.
 	 *
@@ -45,12 +45,12 @@ class EqualWithoutWhitespaceExpectation extends EqualExpectation {
 	{
 		$search = '#\s#';
 		$replace = '';
-		
-        return (preg_replace($search, $replace, $this->_subject)
-            == preg_replace($search, $replace, $compare));
+
+		return (preg_replace($search, $replace, $this->_subject)
+			== preg_replace($search, $replace, $compare));
 	}
-	
-	
+
+
 	/**
 	 * Returns a human-readable test message.
 	 *
@@ -64,8 +64,8 @@ class EqualWithoutWhitespaceExpectation extends EqualExpectation {
 			? 'Whitespace-agnostic equal expectation [' .$this->dumper->describeValue($this->_subject) .']'
 			: 'Whitespace-agnostic equal expectation fails ' .$this->dumper->describeDifference($this->_subject, $compare);
 	}
-    
-	
+
+
 }
 
 
