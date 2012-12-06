@@ -6,6 +6,25 @@
  * @copyright	Experience Internet
  */
 
+/* =general
+ -------------------------------------------------------------*/
+
+/*ie8+*/
+.testee_clearfix:before,
+.testee_clearfix:after,
+.testee_clearfix_left:before,
+.testee_clearfix_left:after  {
+	content:	"";
+	display:	table;
+}
+.testee_clearfix:after {
+	clear:		both;
+}
+
+.testee_clearfix_left:after {
+	clear:		left;
+}
+
 /* =addons_index
  -------------------------------------------------------------*/
 .addons_index {
