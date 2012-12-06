@@ -86,10 +86,19 @@ class Testee_mcp
 	{
 		$vars = array(
 			'module_menu'			=> $this->module_menu,
-			'module_menu_highlight' => $function,
-			'cp_page_title'			=> lang('testee_module_name') . ': ' .
-									$this->module_menu[$function]['title']
+			'module_menu_highlight' => $function
 		);
+
+		if ( ! isset($view_vars['cp_page_title']))
+		{
+			$view_vars['cp_page_title']	= lang('testee_module_name') . ': ' .
+									$this->module_menu[$function]['title'];
+		}
+		else if (substr($view_vars['cp_page_title'], 0, strlen(lang('testee_module_name')) + 1) != lang('testee_module_name') . ':')
+		{
+			$view_vars['cp_page_title']	= lang('testee_module_name') . ': ' .
+											$view_vars['cp_page_title'];
+		}
 
 		$header	= $this->EE->load->view('header.html', $vars, TRUE);
 		$page	= $this->EE->load->view($view, $view_vars, TRUE);
@@ -131,17 +140,86 @@ class Testee_mcp
 	// --------------------------------------------------------------------
 
 	/**
+	 * Displays the module prefs page.
+	 *
+	 * @access  public
 	 * @return  string
 	 */
 
+	public function prefs()
+	{
+		$prefs = $this->_model->get_prefs();
 
 		// -------------------------------------
 		//	build addon list
 		// -------------------------------------
 
 		$all_addons = $this->_model->get_directory_names(PATH_THIRD);
+		$all_addons = array_combine($all_addons, $all_addons);
+
+		// Not all addons will be installed
+		// so not going to trust the EE addon model and will
+		// just make names based on folders
+		foreach ($all_addons as $key => $value)
+		{
+			$all_addons[$key] = ucwords(str_replace('_', ' ', $value));
+		}
+
+		$vars = array(
+			'all_addons'	=> $all_addons,
+			'form_action'	=> $this->_base_qs .AMP .'method=save_prefs',
+			'prefs'			=> $prefs
+		);
+
+		return $this->view(__FUNCTION__, 'prefs.html', $vars);
 	}
-	//END index
+	//END prefs
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * save prefs to table
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+
+	public function save_prefs()
+	{
+		$all_addons = $this->_model->get_directory_names(PATH_THIRD);
+
+		$prefs = array();
+
+		foreach ($_POST as $key => $value)
+		{
+			if (preg_match('/^test_location_addon_([0-9]+)/i', $key, $matches))
+			{
+				$item_num = $matches[1];
+				$loc = 'test_location_location_' . $item_num;
+
+				if (
+					in_array($value, $all_addons) AND
+					isset($_POST[$loc]) AND
+					is_dir($_POST[$loc])
+				)
+				{
+					$prefs['test_location_' . $value] = $_POST[$loc];
+				}
+			}
+		}
+
+		// -------------------------------------
+		//	do something here if there are ever
+		//	any more prefs
+		// -------------------------------------
+
+		$this->_model->set_prefs($prefs);
+
+		//go back to prefs
+		$this->EE->functions->redirect($this->module_menu['prefs']['link']);
+	}
+	//END save_prefs
 
 
 	// --------------------------------------------------------------------
@@ -177,7 +255,7 @@ class Testee_mcp
 			'tests'				=> $test_path
 		);
 
-		return $this->EE->load->view('test_results', $vars, TRUE);
+		return $this->view('index', 'test_results', $vars);
 	}
 	//END run_test
 

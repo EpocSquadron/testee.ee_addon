@@ -1,3 +1,11 @@
+<?php if (isset($message) AND $message != ''):?>
+	<script type="text/javascript">
+		jQuery(function($){
+			$.ee_notice('<?php echo addslashes($message);?>',{open: true, type:"success"});
+		});
+	</script>
+<?php endif;?>
+
 <ul class="tab_menu" id="tab_menu_tabs">
 <?php foreach($module_menu AS $menu_name => $menu_item) : ?>
 	<li class="content_tab<?=($menu_name == $module_menu_highlight) ? ' current': ''?>">

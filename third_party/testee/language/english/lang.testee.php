@@ -30,10 +30,21 @@ $lang = array(
 'start_over'				=> 'start over',
 'test'						=> 'test',
 'tests'						=> 'tests',
-'testee_test_results'		=> 'Testee Test Results',
+'testee_test_results'		=> 'Test Results',
 'you_can_run_tests_via'		=> 'You can also run your tests via',
 'see_the_docs'				=> 'See the documentation',
 'for_more_info'				=> 'for more information',
+
+// --------------------------------------------------------------------
+//	Prefs
+// --------------------------------------------------------------------
+
+'preferences'				=> 'Preferences',
+'save_prefs'				=> 'Save Preferences',
+'addon'						=> 'Add-on',
+'test_location'				=> 'Test Location',
+'add_new_location'			=> 'Add New Location',
+'location_pref_desc'		=> 'You can use these preferences to add custom locations to the test folder for each add-on.',
 
 // --------------------------------------------------------------------
 //	JSON ERRORS

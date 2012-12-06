@@ -1,0 +1,37 @@
+<?=form_open($form_action)?>
+<div id="locations">
+<p><?=lang('location_pref_desc')?></p>
+<?php
+	$count = 0;
+	foreach ($prefs AS $pref_name = $pref_value): ?>
+	<?php if (preg_match('/^test_location_/i', $pref_name, $matches)): ?>
+	<dl class="location_preference testee_clearfix">
+		<button class="remove testee_clearfix"><?=lang('remove')?></button>
+		<dt><?=lang('addon')?></dt>
+		<dd><?=form_dropdown(
+			'test_location_addon_' . $count,
+			$all_addons,
+			str_replace('test_location_', '', $pref_name))?></dd>
+		<dt><?=lang('test_location')?></dt>
+		<dd><?=form_input(
+			'test_location_location_' . $count++,
+			$pref_value)?></dd>
+	</dl>
+	<?php endif;?>
+<?php endforeach; ?>
+	<dl class="location_preference testee_clearfix">
+		<button class="remove testee_clearfix"><?=lang('remove')?></button>
+		<dt><?=lang('addon')?></dt>
+		<dd><?=form_dropdown(
+			'test_location_addon_' . $count,
+			$all_addons)?></dd>
+		<dt><?=lang('test_location')?></dt>
+		<dd><?=form_input(
+			'test_location_location_' . $count++,
+			'')?></dd>
+	</dl>
+</div>
+<div class="submit_wrapper testee_clearfix">
+	<?=form_submit(array('name' => 'submit', 'value' => lang('save_prefs'), 'class' => 'submit')); ?>
+</div>
+<?=form_close(); ?>

@@ -8,3 +8,5 @@
 - Added module menu and header view for menu highlighting and link to docs.
 - Changed link to docs to point to github wiki.
 - Added unprefixed css border-radius for ie9+ support
+- Added preferences page
+- Added ability to set custom test folder locations per addon via preferences

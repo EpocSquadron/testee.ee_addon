@@ -189,3 +189,38 @@
 .test_result_details strong {
 	display : block;
 }
+
+/* =preferences
+ -------------------------------------------------------------*/
+.location_preference {
+	border: 1px solid #ccc;
+	padding: 8px 10px;
+	border-radius: 5px;
+}
+
+	.location_preference dt {
+		float:			left;
+		font-weight:	bold;
+		width:			80px;
+		clear:			left;
+		margin-bottom:	15px;
+	}
+
+	.location_preference dd {
+		float:			left;
+		width:			50%;
+	}
+
+	.location_preference dd:before,
+	.location_preference dd:after {
+		content:	"";
+		display:	table;
+	}
+
+	.location_preference dd:after {
+		clear:		left;
+	}
+
+	.location_preference .remove {
+		float:	right;
+	}
