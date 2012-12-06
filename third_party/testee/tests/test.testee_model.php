@@ -81,11 +81,22 @@ class Test_testee_model extends Testee_unit_test_case {
 
 	public function test__get_theme_url__works_without_trailing_slash()
 	{
-		$themes_url = 'http://example.com/themes';
-		$full_url   = $themes_url .'/third_party/' .$this->_package_name .'/';
 
-		$this->EE->config->expectOnce('item', array('theme_folder_url'));
-		$this->EE->config->setReturnValue('item', $themes_url);
+		//EE 2.5+ supports moveable third party themes
+		if (defined('URL_THIRD_THEMES'))
+		{
+			$full_url = URL_THIRD_THEMES;
+		}
+		else
+		{
+			$themes_url	= 'http://example.com/themes/';
+			$full_url	= $themes_url .'third_party/';
+
+			$this->EE->config->expectOnce('item', array('theme_folder_url'));
+			$this->EE->config->setReturnValue('item', $themes_url);
+		}
+
+		$full_url .= $this->_package_name .'/';
 
 		$this->assertIdentical($full_url, $this->_subject->get_theme_url());
 	}
