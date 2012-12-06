@@ -10,18 +10,16 @@
 
 require_once dirname(__FILE__) .'/classes/testee_cp_reporter.php';
 
-class Testee_mcp {
-
+class Testee_mcp
+{
 	protected $_base_qs;
 	protected $_base_url;
 	protected $_model;
 	protected $EE;
 
-
-
-	/* --------------------------------------------------------------
-	 * PUBLIC METHODS
-	 * ------------------------------------------------------------ */
+	// --------------------------------------------------------------------
+	//	PUBLIC METHODS
+	// --------------------------------------------------------------------
 
 	/**
 	 * Constructor.
@@ -34,6 +32,7 @@ class Testee_mcp {
 	{
 		$this->EE =& get_instance();
 		$this->EE->load->model('testee_model');
+		$this->EE->load->helper('form');
 
 		$this->_model =& $this->EE->testee_model;
 
@@ -56,8 +55,50 @@ class Testee_mcp {
 			.$theme_url .'js/cp.js"></script>');
 
 		$this->EE->javascript->compile();
+
+		$this->docs_url = $this->EE->cp->masked_url(
+			'https://github.com/experience/testee.ee_addon/wiki'
+		);
+
+		$this->module_menu = array(
+			'index' => array(
+				'name'			=> 'index',
+				'link'			=> $this->_base_url,
+				'title'			=> lang('tests_title')
+			),
+			'prefs' => array(
+				'name'			=> 'prefs',
+				'link'			=> $this->_base_url . AMP . 'method=prefs',
+				'title'			=> lang('preferences')
+			),
+			'docs' => array(
+				'name'			=> 'docs',
+				'link'			=> $this->docs_url,
+				'title'			=> lang('documentation'),
+				'new_window'	=> TRUE
+			)
+		);
+	}
+	//END __construct
+
+
+	protected function view($function, $view, $view_vars)
+	{
+		$vars = array(
+			'module_menu'			=> $this->module_menu,
+			'module_menu_highlight' => $function,
+			'cp_page_title'			=> lang('testee_module_name') . ': ' .
+									$this->module_menu[$function]['title']
+		);
+
+		$header	= $this->EE->load->view('header.html', $vars, TRUE);
+		$page	= $this->EE->load->view($view, $view_vars, TRUE);
+
+		return $header . $page;
 	}
 
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Displays the default module control panel page.
@@ -65,9 +106,9 @@ class Testee_mcp {
 	 * @access  public
 	 * @return  string
 	 */
+
 	public function index()
 	{
-		$this->EE->load->helper('form');
 		$this->EE->load->library('table');
 
 		$action_url = $this->EE->functions->fetch_site_index()
@@ -75,19 +116,33 @@ class Testee_mcp {
 					$this->_model->get_package_name(), 'run_tests')
 			.'&addon={addon_name}';
 
-		$docs_url = $this->EE->cp->masked_url(
-			'https://github.com/experience/testee.ee_addon/wiki/_pages');
-
 		$vars = array(
 			'action_url'	=> $action_url,
 			'form_action'	=> $this->_base_qs .AMP .'method=run_test',
-			'cp_page_title'	=> $this->EE->lang->line('testee_module_name'),
-			'docs_url'		=> $docs_url,
+			'docs_url'		=> $this->docs_url,
 			'tests'			=> $this->_model->get_tests()
 		);
 
-		return $this->EE->load->view('tests_index', $vars, TRUE);
+		return $this->view(__FUNCTION__, 'tests_index', $vars);
 	}
+	//END index
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * @return  string
+	 */
+
+
+		// -------------------------------------
+		//	build addon list
+		// -------------------------------------
+
+		$all_addons = $this->_model->get_directory_names(PATH_THIRD);
+	}
+	//END index
+
 
 	// --------------------------------------------------------------------
 
@@ -124,9 +179,10 @@ class Testee_mcp {
 
 		return $this->EE->load->view('test_results', $vars, TRUE);
 	}
+	//END run_test
 
 }
-
+//END Testee_mcp
 
 /* End of file    : mcp.testee.php */
 /* File location  : third_party/testee/mcp.testee.php */

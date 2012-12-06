@@ -21,6 +21,7 @@ $lang = array(
 //	ADDONS INDEX
 // --------------------------------------------------------------------
 
+'tests_title'				=> 'Tests',
 'test_link_title'			=> 'See the %addon_name% add-on tests',
 'no_tests'					=> 'No add-on tests were found.',
 'or'						=> 'or',
