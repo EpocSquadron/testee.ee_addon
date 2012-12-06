@@ -30,6 +30,9 @@ $lang = array(
 'test'						=> 'test',
 'tests'						=> 'tests',
 'testee_test_results'		=> 'Testee Test Results',
+'you_can_run_tests_via'		=> 'You can also run your tests via',
+'see_the_docs'				=> 'See the documentation',
+'for_more_info'				=> 'for more information',
 
 // --------------------------------------------------------------------
 //	JSON ERRORS

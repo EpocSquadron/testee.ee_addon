@@ -26,8 +26,8 @@
 
 <div class="submit_wrapper">
 	<?=form_submit(array('name' => 'submit', 'value' => lang('run_tests'), 'class' => 'submit')); ?>
-	<p class="quiet">You can also run your tests via <strong><?php echo $action_url; ?></strong>.
-	<a href="<?php echo $docs_url; ?>">See the documentation</a> for more information.</p>
+	<p class="quiet"><?=lang('you_can_run_tests_via')?> <strong><?php echo $action_url; ?></strong>.
+	<a href="<?php echo $docs_url; ?>"><?=lang('see_the_docs')?></a> <?=lang('for_more_info')?>.</p>
 </div>
 <?=form_close(); ?>
 
