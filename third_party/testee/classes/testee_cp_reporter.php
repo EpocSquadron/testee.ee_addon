@@ -72,7 +72,7 @@ class Testee_cp_reporter extends Testee_reporter {
 			echo '<div class="test_result ' .$class .'">'
 				.'<span class="badge">' .$label .'</span>'
 				.'<p class="test_result_details"><strong>Test:</strong>'
-				.implode(' &rarr; ', $result->breadcrumb)
+				.implode('<br/>&nbsp;&nbsp;&nbsp;&nbsp;&rarr;&nbsp;', $result->breadcrumb)
 				.'</p>'
 				.'<p class="test_result_details"><strong>Message:</strong>'
 				.htmlentities($result->message, ENT_COMPAT)
