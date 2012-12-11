@@ -1,3 +1,6 @@
+### Version 2.3
+- Added Qunit JavaScript unit testing support for addons.
+
 ### Version 2.2.4
 
 - Fixed a bug where 'Testee Test Results' title was not being pulled from the lang file.
