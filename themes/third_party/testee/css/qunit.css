@@ -71,10 +71,10 @@
 }
 
 #qunit-testrunner-toolbar {
-	padding: 0.5em 0 0.5em 2em;
-	color: #5E740B;
-	background-color: #eee;
-	overflow: hidden;
+	position: absolute;
+	top: 18px;
+	right: 15px;
+	color: #c2ccd1;
 }
 
 #qunit-userAgent {
@@ -82,6 +82,7 @@
 	color: #5E740B;
 	background-color: #eee;
 	font-weight:normal;
+	display:none;
 }
 
 #qunit-modulefilter-container {
