@@ -131,10 +131,11 @@ class Testee_model extends CI_Model
 	 * directory.
 	 *
 	 * @access  public
+	 * @param	string	[varname] [description]
 	 * @return  array
 	 */
 
-	public function get_tests()
+	public function get_tests($type = 'php')
 	{
 		$tests  = array();
 
@@ -160,7 +161,19 @@ class Testee_model extends CI_Model
 				continue;
 			}
 
-			$test_pattern = '/^test[_|\.]([^\.]*)\.php$/i';
+			if ($type == 'all')
+			{
+				$test_pattern = '/^test[_|\.]([^\.]*)\.(?:php|js)$/i';
+			}
+			else if ($type == 'js')
+			{
+				$test_pattern = '/^test[_|\.]([^\.]*)\.js$/i';
+			}
+			else
+			{
+				$test_pattern = '/^test[_|\.]([^\.]*)\.php$/i';
+			}
+
 			$addon_tests  = array();
 
 			foreach ($all_tests AS $test)

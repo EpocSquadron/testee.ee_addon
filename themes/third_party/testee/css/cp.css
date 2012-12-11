@@ -152,6 +152,11 @@
 	background-color : rgb(220, 0, 0);
 }
 
+.qunit_addon_header {
+	border-bottom: 1px solid #ccc;
+	margin-left: 10px;
+	margin-top: 20px;
+}
 
 /* =test_result
  -------------------------------------------------------------*/

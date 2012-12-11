@@ -22,6 +22,8 @@ $lang = array(
 // --------------------------------------------------------------------
 
 'tests_title'				=> 'Tests',
+'js_tests_title'			=> 'JavaScript Tests',
+'php_tests_title'			=> 'PHP Tests',
 'test_link_title'			=> 'See the %addon_name% add-on tests',
 'no_tests'					=> 'No add-on tests were found.',
 'or'						=> 'or',
@@ -31,6 +33,8 @@ $lang = array(
 'test'						=> 'test',
 'tests'						=> 'tests',
 'testee_test_results'		=> 'Test Results',
+'testee_php_test_results'	=> 'PHP Test Results',
+'testee_js_test_results'	=> 'JavaScript Test Results',
 'you_can_run_tests_via'		=> 'You can also run your tests via',
 'see_the_docs'				=> 'See the documentation',
 'for_more_info'				=> 'for more information',
