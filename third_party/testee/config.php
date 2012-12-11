@@ -7,13 +7,13 @@
  * @author			2.2.4+ Solspace (http://github.com/Solspace/)
  * @copyright		Experience Internet
  * @package			Testee
- * @version			2.2.4
+ * @version			2.3.0
  */
 
 if ( ! defined('TESTEE_NAME'))
 {
 	define('TESTEE_NAME', 'Testee');
-	define('TESTEE_VERSION', '2.2.4');
+	define('TESTEE_VERSION', '2.3.0');
 }
 
 $config['name']		= TESTEE_NAME;
