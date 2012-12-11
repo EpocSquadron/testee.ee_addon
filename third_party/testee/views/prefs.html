@@ -3,7 +3,7 @@
 <p><?=lang('location_pref_desc')?></p>
 <?php
 	$count = 0;
-	foreach ($prefs AS $pref_name = $pref_value): ?>
+	foreach ($prefs as $pref_name => $pref_value): ?>
 	<?php if (preg_match('/^test_location_/i', $pref_name, $matches)): ?>
 	<dl class="location_preference testee_clearfix">
 		<button class="remove testee_clearfix"><?=lang('remove')?></button>
