@@ -133,16 +133,16 @@
 		<div id="qunit-fixture"></div>
 		<script src="<?=$testee_themes_url?>js/qunit.js"></script>
 		<script type="text/javascript">
-				//we have to do this because in the URL
-				//we have a query string module='' and
-				//qunit looks for that and assigns it
-				QUnit.config.module = '<?=$addon_short_name?>';
-		</script>
-		<script type='text/javascript'>
-			<?=$test_js?>
-		</script>
-		<script type='text/javascript'>
-			//this sets a click listener on itself for all clicks and reports
+			//we have to do this because in the URL
+			//we have a query string module='' and
+			//qunit looks for that and assigns it
+			QUnit.config.module = '<?=$addon_short_name?>';
+
+			//the following must be run after qunit load
+			//and body start
+
+			//this sets a click listener on itself for
+			//all clicks and reports
 			//back to the parent
 			(function(document){
 				function addListener(element, eventName, handler)
@@ -161,14 +161,23 @@
 					}
 				}
 
-				var body = document.getElementsByTagName('body')[0];
+				var body	= document.getElementsByTagName('body')[0];
+				var bodyId	= body.getAttribute('id');
 
 				addListener(body, 'click', function(){
 					setTimeout(function(){
-						window.parent.doHeight(body.getAttribute('id'));
+						window.parent.doHeight(bodyId);
 					},100);
 				});
+
+				QUnit.done = function(failures, total)
+				{
+					window.parent.doHeight(bodyId);
+				};
 			}(document));
+		</script>
+		<script type='text/javascript'>
+			<?=$test_js?>
 		</script>
 	</body>
 </html>

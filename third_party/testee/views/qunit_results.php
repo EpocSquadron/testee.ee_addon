@@ -47,6 +47,14 @@
 			var htmlHeight	= contents.find('html').outerHeight();
 			var body		= contents.find('body');
 
+			if (body.length == 0)
+			{
+				setTimeout(function(){
+					doHeight(thing);
+				},0);
+				return;
+			}
+
 			//add id to body for listener
 			body.attr('id', $that.attr('id'));
 
