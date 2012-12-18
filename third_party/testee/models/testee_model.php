@@ -9,8 +9,8 @@
  */
 
 require_once dirname(__FILE__) .'/../config.php';
-require_once dirname(__FILE__) .'/../classes/testee_addon.php';
-require_once dirname(__FILE__) .'/../classes/testee_unit_test_case.php';
+require_once dirname(__FILE__) .'/../classes/simpletest/testee_addon.php';
+require_once dirname(__FILE__) .'/../classes/simpletest/testee_unit_test_case.php';
 
 class Testee_model extends CI_Model
 {
@@ -131,7 +131,7 @@ class Testee_model extends CI_Model
 	 * directory.
 	 *
 	 * @access  public
-	 * @param	string	[varname] [description]
+	 * @param	string	$type	specifies the type of test to run
 	 * @return  array
 	 */
 
