@@ -15,7 +15,8 @@ if ( ! class_exists('EI_datatype'))
 
 require_once dirname(__FILE__) .'/testee_test.php';
 
-class Testee_addon extends EI_datatype {
+class Testee_addon extends EI_datatype
+{
 
 
 	/* --------------------------------------------------------------

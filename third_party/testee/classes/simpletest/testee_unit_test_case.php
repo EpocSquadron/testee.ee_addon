@@ -20,6 +20,14 @@ require_once BASEPATH .'database/DB_active_rec.php';
 require_once BASEPATH .'database/DB_forge.php';
 require_once BASEPATH .'database/DB_result.php';
 require_once BASEPATH .'database/DB_utility.php';
+//needed for mysql_driver
+//in theory this would never be hit, but you never know.
+if ( ! class_exists('CI_DB'))
+{
+	eval('class CI_DB extends CI_DB_active_record { }');
+}
+
+require_once BASEPATH .'database/drivers/mysql/mysql_driver.php';
 
 require_once APPPATH .'core/EE_Config.php';
 require_once APPPATH .'core/EE_Input.php';
@@ -39,9 +47,9 @@ require_once APPPATH .'libraries/Layout.php';
 require_once APPPATH .'libraries/Session.php';
 require_once APPPATH .'libraries/Template.php';
 
-require_once PATH_THIRD .'testee/classes/testee_equal_without_whitespace_expectation.php';
-require_once PATH_THIRD .'testee/simpletest/unit_tester.php';
-require_once PATH_THIRD .'testee/simpletest/mock_objects.php';
+require_once realpath(rtrim(dirname(__FILE__), '/') . '/testee_equal_without_whitespace_expectation.php');
+require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/unit_tester.php');
+require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/mock_objects.php');
 
 class Testee_unit_test_case extends UnitTestCase
 {
@@ -50,20 +58,48 @@ class Testee_unit_test_case extends UnitTestCase
 
 	// @see _initialize_active_record_methods
 	protected $_active_record_methods = array(
-		'distinct', 'from', 'group_by', 'having',
-		'join', 'like', 'limit', 'not_like', 'or_having',
-		'or_like', 'or_not_like', 'or_where', 'or_where_in',
-		'or_where_not_in', 'order_by', 'select', 'select_avg',
-		'select_max', 'select_min', 'select_sum', 'set', 'where',
-		'where_in', 'where_not_in'
+		'distinct',
+		'from',
+		'group_by',
+		'having',
+		'join',
+		'like',
+		'limit',
+		'not_like',
+		'or_having',
+		'or_like',
+		'or_not_like',
+		'or_where',
+		'or_where_in',
+		'or_where_not_in',
+		'order_by',
+		'select',
+		'select_avg',
+		'select_max',
+		'select_min',
+		'select_sum',
+		'set',
+		'where',
+		'where_in',
+		'where_not_in'
 	);
 
 	// @see setUp
 	protected $_mysql_methods = array(
-		'db_connect', 'db_pconnect', 'reconnect', 'db_select',
-		'trans_begin', 'trans_commit', 'trans_rollback', 'escape_str',
-		'affected_rows', 'insert_id', 'count_all', 'escapes',
-		'implicitly', 'maps'
+		'db_connect',
+		'db_pconnect',
+		'reconnect',
+		'db_select',
+		'trans_begin',
+		'trans_commit',
+		'trans_rollback',
+		'escape_str',
+		'affected_rows',
+		'insert_id',
+		'count_all',
+		'escapes',
+		'implicitly',
+		'maps'
 	);
 
 
@@ -80,6 +116,9 @@ class Testee_unit_test_case extends UnitTestCase
 	public function __construct()
 	{
 		$this->EE =& get_instance();
+
+		//these will get all of the correct public methods
+		$this->_mysql_methods = get_class_methods('CI_DB_mysql_driver');
 	}
 	//END __construct
 

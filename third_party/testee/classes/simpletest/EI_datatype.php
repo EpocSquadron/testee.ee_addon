@@ -8,7 +8,7 @@
  * @package         EI
  */
 
-require_once dirname(__FILE__) .'/../helpers/EI_number_helper.php';
+require_once dirname(__FILE__) .'/../../helpers/EI_number_helper.php';
 
 class EI_datatype
 {

@@ -8,7 +8,7 @@
  * @copyright	Experience Internet
  */
 
-require_once PATH_THIRD .'testee/simpletest/expectation.php';
+require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/expectation.php');
 
 class EqualWithoutWhitespaceExpectation extends EqualExpectation {
 
