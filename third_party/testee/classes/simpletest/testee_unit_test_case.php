@@ -116,9 +116,6 @@ class Testee_unit_test_case extends UnitTestCase
 	public function __construct()
 	{
 		$this->EE =& get_instance();
-
-		//these will get all of the correct public methods
-		$this->_mysql_methods = get_class_methods('CI_DB_mysql_driver');
 	}
 	//END __construct
 

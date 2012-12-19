@@ -10,7 +10,8 @@
 
 require_once dirname(__FILE__) .'/testee_reporter.php';
 
-class Testee_cp_reporter extends Testee_reporter {
+class Testee_cp_reporter extends Testee_reporter
+{
 
 
 	/* --------------------------------------------------------------

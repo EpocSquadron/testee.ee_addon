@@ -8,9 +8,9 @@
  * @package     Testee
  */
 
-require_once dirname(__FILE__) .'/../config.php';
-require_once dirname(__FILE__) .'/../classes/simpletest/testee_addon.php';
-require_once dirname(__FILE__) .'/../classes/simpletest/testee_unit_test_case.php';
+require_once realpath(dirname(__FILE__) .'/../config.php');
+require_once realpath(dirname(__FILE__) .'/../classes/simpletest/testee_addon.php');
+require_once realpath(dirname(__FILE__) .'/../classes/simpletest/testee_unit_test_case.php');
 
 class Testee_model extends CI_Model
 {
@@ -234,7 +234,6 @@ class Testee_model extends CI_Model
 
 		// Create the Test Suite.
 		$test_suite = new TestSuite('Testee Test Suite');
-
 		// Add the test files.
 		foreach ($test_path AS $path)
 		{

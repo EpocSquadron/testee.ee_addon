@@ -8,7 +8,7 @@
  * @package     Testee
  */
 
-require_once dirname(__FILE__) .'/classes/testee_json_reporter.php';
+require_once dirname(__FILE__) .'/classes/simpletest/testee_json_reporter.php';
 
 class Testee {
 

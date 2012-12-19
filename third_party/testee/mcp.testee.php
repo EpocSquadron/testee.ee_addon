@@ -8,7 +8,7 @@
  * @package     Testee
  */
 
-require_once dirname(__FILE__) .'/classes/testee_cp_reporter.php';
+require_once dirname(__FILE__) .'/classes/simpletest/testee_cp_reporter.php';
 
 class Testee_mcp
 {
@@ -219,6 +219,12 @@ class Testee_mcp
 		$all_addons = $this->_model->get_directory_names(PATH_THIRD);
 
 		$prefs = array();
+
+		//no funny business
+		if (empty($_POST))
+		{
+			return $this->EE->functions->redirect($this->module_menu['prefs']['link']);
+		}
 
 		foreach ($_POST as $key => $value)
 		{
