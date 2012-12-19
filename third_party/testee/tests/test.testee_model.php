@@ -8,9 +8,10 @@
  * @package			Testee
  */
 
-require_once PATH_THIRD .'testee/models/testee_model.php';
+require_once realpath(dirname(__FILE__) . '/../models/testee_model.php');
 
-class Test_testee_model extends Testee_unit_test_case {
+class Test_testee_model extends Testee_unit_test_case
+{
 
 	private $_package_name;
 	private $_package_version;

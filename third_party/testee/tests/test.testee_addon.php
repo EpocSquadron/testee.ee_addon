@@ -8,8 +8,8 @@
  * @package     Testee
  */
 
-require_once PATH_THIRD.'testee/classes/testee_addon.php';
-require_once PATH_THIRD.'testee/classes/testee_test.php';
+require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_addon.php');
+require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_test.php');
 
 class Test_testee_addon extends Testee_unit_test_case {
 
