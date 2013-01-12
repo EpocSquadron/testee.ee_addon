@@ -1213,7 +1213,7 @@ class Mock {
      */
     static function generate($class, $mock_class = false, $methods = false) {
         $generator = new MockGenerator($class, $mock_class);
-        return @$generator->generateSubclass($methods);
+        return $generator->generateSubclass($methods);
     }
 
     /**
@@ -1228,7 +1228,7 @@ class Mock {
      */
     static function generatePartial($class, $mock_class, $methods) {
         $generator = new MockGenerator($class, $mock_class);
-        return @$generator->generatePartial($methods);
+        return $generator->generatePartial($methods);
     }
 
     /**
