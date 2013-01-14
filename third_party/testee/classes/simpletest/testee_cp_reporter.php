@@ -75,9 +75,9 @@ class Testee_cp_reporter extends Testee_reporter
 				.'<p class="test_result_details"><strong>Test:</strong>'
 				.implode('<br/>&nbsp;&nbsp;&nbsp;&nbsp;&rarr;&nbsp;', $result->breadcrumb)
 				.'</p>'
-				.'<p class="test_result_details"><strong>Message:</strong>'
+				.'<p class="test_result_details"><strong>Message:</strong><pre>'
 				.htmlentities($result->message, ENT_COMPAT)
-				.'</p>'
+				.'</pre></p>'
 				.'</div>';
 		}
 
