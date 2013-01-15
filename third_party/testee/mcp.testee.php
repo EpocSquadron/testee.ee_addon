@@ -10,6 +10,8 @@
 
 require_once dirname(__FILE__) .'/classes/simpletest/testee_cp_reporter.php';
 
+require_once 'config.php';
+
 class Testee_mcp
 {
 	protected $_base_qs;
@@ -49,10 +51,10 @@ class Testee_mcp
 
 		// Include the custom CSS and JS on all pages.
 		$this->EE->cp->add_to_head('<link rel="stylesheet" href="'
-			.$theme_url .'css/cp.css" />');
+			.$theme_url .'css/cp.css?' . TESTEE_VERSION . '" />');
 
 		$this->EE->cp->add_to_foot('<script src="'
-			.$theme_url .'js/cp.js"></script>');
+			.$theme_url .'js/cp.js?' . TESTEE_VERSION . '"></script>');
 
 		$this->EE->javascript->compile();
 

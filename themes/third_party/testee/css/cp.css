@@ -166,6 +166,7 @@
 	padding-bottom : 5px;
 	padding-left : 100px;
 	overflow-y: auto;
+	word-wrap: break-word;
 }
 
 .badge {
