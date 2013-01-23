@@ -1,3 +1,7 @@
+### Version 2.4
+- Added support for PHPunit type tests.
+- Fixed a bug with saving empty preferences
+
 ### Version 2.3
 - Added Qunit JavaScript unit testing support for addons.
 

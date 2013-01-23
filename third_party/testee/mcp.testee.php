@@ -257,7 +257,7 @@ class Testee_mcp
 
 				if (
 					in_array($value, $all_addons) AND
-					isset($_POST[$loc])
+					! empty($_POST[$loc])
 				)
 				{
 					$prefs['test_location_' . $value] = $_POST[$loc];
