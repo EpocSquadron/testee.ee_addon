@@ -21,4 +21,4 @@ $config['version']	= TESTEE_VERSION;
 //$config['nsm_addon_updater']['versions_xml'] = '';
 
 /* End of file      : config.php */
-/* File location    : third_party/campaigner/config.php */
+/* File location    : third_party/testee/config.php */

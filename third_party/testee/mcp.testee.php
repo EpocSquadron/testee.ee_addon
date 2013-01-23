@@ -8,8 +8,6 @@
  * @package     Testee
  */
 
-require_once dirname(__FILE__) .'/classes/simpletest/testee_cp_reporter.php';
-
 require_once 'config.php';
 
 class Testee_mcp
@@ -66,7 +64,12 @@ class Testee_mcp
 			'index' => array(
 				'name'			=> 'index',
 				'link'			=> $this->_base_url,
-				'title'			=> lang('php_tests_title')
+				'title'			=> lang('simpletest_php_tests_title')
+			),
+			'phpunit_tests' => array(
+				'name'			=> 'phpunit_tests',
+				'link'			=> $this->_base_url . AMP . 'method=phpunit_tests',
+				'title'			=> lang('phpunit_php_tests_title')
 			),
 			'js_tests' => array(
 				'name'			=> 'js_tests',
@@ -123,7 +126,7 @@ class Testee_mcp
 	 * @return  string
 	 */
 
-	public function index()
+	public function index( $test_type = 'simpletest', $highlight = __FUNCTION__)
 	{
 		$this->EE->load->library('table');
 
@@ -134,14 +137,31 @@ class Testee_mcp
 
 		$vars = array(
 			'action_url'	=> $action_url,
-			'form_action'	=> $this->_base_qs .AMP .'method=run_test',
+			'form_action'	=> $this->_base_qs . AMP .'method=run_test' .
+												AMP . 'test_type=' . $test_type,
 			'docs_url'		=> $this->docs_url,
-			'tests'			=> $this->_model->get_tests()
+			'tests'			=> $this->_model->get_tests('php', $test_type)
 		);
 
-		return $this->view(__FUNCTION__, 'tests_index', $vars);
+		return $this->view($highlight, 'tests_index', $vars);
 	}
 	//END index
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Displays the default module control panel page.
+	 *
+	 * @access  public
+	 * @return  string
+	 */
+
+	public function phpunit_tests()
+	{
+		return $this->index('phpunit', 'phpunit_tests');
+	}
+	//END phpunit_tests
 
 
 	// --------------------------------------------------------------------
@@ -269,13 +289,19 @@ class Testee_mcp
 	public function run_test()
 	{
 		$test_path = $this->EE->input->post('tests') OR ! is_array($test_path);
+		$test_type = $this->EE->input->get_post('test_type');
+
+		if ($test_type != 'phpunit')
+		{
+			$test_type = 'simpletest';
+		}
+
+		$this->EE->load->library('TesteeSuiteRunner');
+		$this->EE->testeesuiterunner->setTestType($test_type);
 
 		try
 		{
-			$test_results = $this->_model->run_tests(
-				$test_path,
-				new Testee_cp_reporter()
-			);
+			$test_results = $this->EE->testeesuiterunner->runTests($test_path);
 		}
 		catch (Exception $e)
 		{
@@ -284,14 +310,21 @@ class Testee_mcp
 		}
 
 		$vars = array(
-			'form_action'		=> $this->_base_qs .AMP .'method=run_test',
-			'tests_index_url'	=> $this->_base_url,
+			'form_action'		=> $this->_base_qs .AMP .'method=run_test' .
+													AMP . 'test_type=' . $test_type,
+			'tests_index_url'	=> $this->_base_url . ((
+										$test_type == 'phpunit'
+									) ? AMP . 'method=phpunit_tests' : ''),
 			'cp_page_title'		=> lang('testee_php_test_results'),
 			'results'			=> $test_results,
 			'tests'				=> $test_path
 		);
 
-		return $this->view('index', 'test_results', $vars);
+		return $this->view(
+			($test_type == 'simpletest') ? 'index' : 'phpunit_tests',
+			'test_results',
+			$vars
+		);
 	}
 	//END run_test
 

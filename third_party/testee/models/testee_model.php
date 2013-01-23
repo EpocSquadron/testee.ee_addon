@@ -8,9 +8,11 @@
  * @package     Testee
  */
 
-require_once realpath(dirname(__FILE__) .'/../config.php');
-require_once realpath(dirname(__FILE__) .'/../classes/simpletest/testee_addon.php');
-require_once realpath(dirname(__FILE__) .'/../classes/simpletest/testee_unit_test_case.php');
+require_once realpath(dirname(__FILE__) . '/../config.php');
+require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_addon.php');
+require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_unit_test_case.php');
+require_once realpath(dirname(__FILE__) . '/../classes/phpunit/testee_phpunit_test_case.php');
+require_once realpath(dirname(__FILE__) . '/../vendor/autoload.php');
 
 class Testee_model extends CI_Model
 {
@@ -19,6 +21,8 @@ class Testee_model extends CI_Model
 	private $_package_version;
 
 	private $prefs_table_name = 'testee_preferences';
+
+	protected $test_type = 'simpletest';
 
 	// --------------------------------------------------------------------
 	//	PUBLIC METHODS
@@ -135,7 +139,7 @@ class Testee_model extends CI_Model
 	 * @return  array
 	 */
 
-	public function get_tests($type = 'php')
+	public function get_tests($type = 'php', $suite = 'simpletest')
 	{
 		$tests  = array();
 
@@ -178,15 +182,50 @@ class Testee_model extends CI_Model
 
 			foreach ($all_tests AS $test)
 			{
-				if ( ! preg_match($test_pattern, $test))
+				if ( ! preg_match($test_pattern, $test, $matches))
 				{
 					continue;
 				}
 
-				$addon_tests[] = new Testee_test(array(
-					'file_name' => $test,
-					'file_path' => $test_dir_path .DIRECTORY_SEPARATOR .$test
-				));
+				$file_path = $test_dir_path . '/' . $test;
+
+				$has_tests = FALSE;
+
+				//JS gets a pass here
+				if ($type == 'js')
+				{
+					$addon_tests[] = new Testee_test(array(
+						'file_name' => $test,
+						'file_path' => $file_path
+					));
+
+					continue;
+				}
+
+				// -------------------------------------
+				//	test type?
+				// -------------------------------------
+
+				if ($suite == 'simpletest')
+				{
+					$loader = new SimpleFileLoader();
+					$result = $loader->load($file_path);
+					$has_tests = ! ( $result instanceof BadTestSuite);
+				}
+				else
+				{
+					$loader = new PHPUnit_Framework_TestSuite();
+					$loader->addTestFile($file_path);
+					$has_tests = ($loader->count() > 0);
+				}
+
+				if ($has_tests)
+				{
+					$addon_tests[] = new Testee_test(array(
+						'file_name' => $test,
+						'file_path' => $file_path
+					));
+				}
 			}
 
 			if ($addon_tests)
@@ -201,155 +240,6 @@ class Testee_model extends CI_Model
 		return $tests;
 	}
 	//END get_tests
-
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Run the tests.
-	 *
-	 * @author  Stephen Lewis
-	 * @author  Jamie Rumbelow
-	 * @author  Bjørn Børresen
-	 * @param   array             $test_path  The tests to run.
-	 * @param   Testee_reporter   $reporter   The custom reporter used for output.
-	 * @return  string
-	 */
-
-	public function run_tests(Array $test_path = array(),
-		Testee_reporter $reporter
-	)
-	{
-		// Can't do anything without tests to run.
-		if ( ! $test_path)
-		{
-			throw new Exception('Missing test path(s).');
-		}
-
-		// Get rid of E_DEPRECATION errors for anybody using PHP5.3.
-		if (phpversion() >= 5.3)
-		{
-			error_reporting(error_reporting() & ~E_DEPRECATED);
-		}
-
-		// Create the Test Suite.
-		$test_suite = new TestSuite('Testee Test Suite');
-		// Add the test files.
-		foreach ($test_path AS $path)
-		{
-			if (stristr(PATH_THIRD, $path))
-			{
-				/**
-				 * Handle Windows paths correctly.
-				 *
-				 * @author  Bjørn Børresen (http://twitter.com/bjornbjorn)
-				 * @since   0.9.0
-				 */
-
-				$package_path = explode(DIRECTORY_SEPARATOR,
-					str_replace(PATH_THIRD, '', $path));
-
-				if (count($package_path) == 3
-					&& $package_path[1] == 'tests'
-					&& file_exists($path)
-				)
-				{
-					$test_suite->addFile($path);
-				}
-			}
-			else if (file_exists($path))
-			{
-				$test_suite->addFile($path);
-			}
-		}
-
-		// Make a note of the real EE objects. These are replaced by
-		// mock objects during testing.
-
-		$real_config		= $this->EE->config;
-		$real_db			= $this->EE->db;
-		$real_extensions	= $this->EE->extensions;
-		$real_functions		= $this->EE->functions;
-		$real_input			= $this->EE->input;
-		$real_lang			= $this->EE->lang;
-		$real_loader		= $this->EE->load;
-		$real_output		= $this->EE->output;
-		$real_session		= $this->EE->session;
-		$real_uri			= $this->EE->uri;
-
-		// These don't always exist.
-		$real_cp		= (isset($this->EE->cp)) ? $this->EE->cp : FALSE;
-		$real_dbforge	= (isset($this->EE->dbforge)) ? $this->EE->dbforge : FALSE;
-		$real_email		= (isset($this->EE->email)) ? $this->EE->email : FALSE;
-		$real_layout	= (isset($this->EE->layout)) ? $this->EE->layout : FALSE;
-		$real_table		= (isset($this->EE->table)) ? $this->EE->table : FALSE;
-		$real_template	= (isset($this->EE->template)) ? $this->EE->template : FALSE;
-		$real_tmpl		= (isset($this->EE->TMPL)) ? $this->EE->TMPL : FALSE;
-
-		$real_javascript = (isset($this->EE->javascript))
-			? $this->EE->javascript : FALSE;
-
-		$real_typography = (isset($this->EE->typography))
-			? $this->EE->typography : FALSE;
-
-
-		// TRICKY:
-		// If the tests are being run via an ACTion, certain EE constants appear to
-		// be undefined. So far, I've only run into this issue with the BASE
-		// constant, but it's quite possible that there are others.
-		//
-		// The current solution, which works fine for now, is to define the missing
-		// constants here, before the tests are run.
-
-		if ( ! defined('BASE'))
-		{
-			define('BASE', 'http://testee.com/admin.php');
-		}
-
-
-		// TRICKY:
-		// Ideally, we'd just like to run our tests, and return the result to the
-		// caller to do with as they please. This would let the reporter return
-		// whatever is most appropriate (raw HTML, structured data, etc).
-		//
-		// Unfortunately, that's not how SimpleTest works. The run() method returns
-		// a boolean value indicating whether the test suite ran, and the reporter
-		// is expected to echo out its results to the buffer.
-		//
-		// We capture said buffer to prevent it from being echoed directly to the
-		// screen, and return it to the caller.
-
-		ob_start();
-		$test_suite->run($reporter);
-		$test_results = ob_get_clean();
-
-		// Reinstate the real EE objects.
-		$this->EE->config		= $real_config;
-		$this->EE->cp			= $real_cp;
-		$this->EE->db			= $real_db;
-		$this->EE->extensions	= $real_extensions;
-		$this->EE->functions	= $real_functions;
-		$this->EE->input		= $real_input;
-		$this->EE->lang			= $real_lang;
-		$this->EE->load			= $real_loader;
-		$this->EE->output		= $real_output;
-		$this->EE->session		= $real_session;
-		$this->EE->uri			= $real_uri;
-
-		// The optional extras.
-		if ($real_cp)			$this->EE->cp			= $real_cp;
-		if ($real_dbforge)		$this->EE->dbforge		= $real_dbforge;
-		if ($real_email)		$this->EE->email		= $real_email;
-		if ($real_javascript)	$this->EE->javascript	= $real_javascript;
-		if ($real_layout)		$this->EE->layout		= $real_layout;
-		if ($real_table)		$this->EE->table		= $real_table;
-		if ($real_template)		$this->EE->template		= $real_template;
-		if ($real_tmpl)			$this->EE->TMPL			= $real_tmpl;
-		if ($real_typography)	$this->EE->typography	= $real_typography;
-
-		return $test_results;
-	}
-	//END run_tests
 
 
 	// --------------------------------------------------------------------
