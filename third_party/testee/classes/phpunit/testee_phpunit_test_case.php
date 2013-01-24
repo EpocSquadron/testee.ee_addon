@@ -40,6 +40,8 @@ require_once APPPATH .'core/EE_Loader.php';
 require_once APPPATH .'core/EE_Output.php';
 require_once APPPATH .'core/EE_URI.php';
 
+require_once PATH_FT .'EE_Fieldtype.php';
+
 require_once APPPATH .'libraries/Cp.php';
 require_once APPPATH .'libraries/EE_Email.php';
 require_once APPPATH .'libraries/EE_Javascript.php';
@@ -52,7 +54,7 @@ require_once APPPATH .'libraries/Session.php';
 require_once APPPATH .'libraries/Template.php';
 
 //require_once dirname(__FILE__) .'/testee_equal_without_whitespace_expectation.php';
-require_once realpath(dirname(__FILE__) . '/../../vendor/autoload.php');
+require_once PATH_THIRD . '/testee/vendor/autoload.php';
 
 class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 {
@@ -210,6 +212,33 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	}
 	//END __construct
 
+	public function setMockery($useMockery = false)
+	{
+		$this->useMockery = (bool) $useMockery;
+
+		if ($this->useMockery)
+		{
+			require_once 'testee_mockery_container.php';
+			\Mockery::setContainer(new Testee_mockery_contaier());
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Tear Down after test
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+
+	public function tearDown()
+	{
+		parent::tearDown();
+		$this->setMockery(false);
+	}
+	//END tearDown
+
 
 	// --------------------------------------------------------------------
 
@@ -222,10 +251,14 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 
 	public function setUp($useMockery = FALSE)
 	{
-		$this->useMockery = (bool) $useMockery;
+		$this->setMockery($useMockery);
 
 		// -------------------------------------
-		//	build mocks
+		//	pre-build mocks
+		// -------------------------------------
+		//	we are doing it this way
+		//	because there are more items built
+		//	than we actually link to.
 		// -------------------------------------
 
 		//mockey mock and the funky bunch
@@ -276,13 +309,19 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 *
 	 * @access	protected
 	 * @param	string	$class		class to be mocked
-	 * @param	string	$clone_name	name of new class built as clone
+	 * @param	string	$cloneName	name of new class built as clone
 	 * @param	array	$methods	methods to add to mock
 	 * @return	object				instance of getMock
 	 */
 
-	protected function buildMock($class, $clone_name = '', $methods = array())
+	protected function buildMock($class, $cloneName = '', $methods = array())
 	{
+		if ($this->useMockery)
+		{
+			return $this->buildMockeryMock($class, $cloneName, $methods);
+		}
+
+
 		if ( ! class_exists($class))
 		{
 			throw new Exception('Class does not exist: ' . $class);
@@ -294,10 +333,10 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 
 		$list_key = $class;
 
-		if ((string) $clone_name != '')
+		if ((string) $cloneName != '')
 		{
-			$list_key = (string) $clone_name;
-			$mock->setMockClassName((string) $clone_name);
+			$list_key = (string) $cloneName;
+			$mock->setMockClassName((string) $cloneName);
 		}
 
 		if ( ! empty($methods))
@@ -313,6 +352,57 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 
 		//store ref at key
 		$this->mockList[$list_key] = & $obj;
+
+		return $obj;
+	}
+	//END buildMock
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Build Mock Object with Mockery
+	 *
+	 * @access	protected
+	 * @param	string	$class		class to be mocked
+	 * @param	string	$cloneName	! for the moment, this is unused
+	 * @param	array	$methods	methods to add to mock
+	 * @return	object				instance of getMock
+	 */
+
+	protected function buildMockeryMock($class, $cloneName = '', $methods = array())
+	{
+		if ( ! class_exists($class))
+		{
+			throw new Exception('Class does not exist: ' . $class);
+			return;
+		}
+
+		//we need to allow mocking non-existant so we can work
+		//with objects that use __call
+		\Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
+		\Mockery::getConfiguration()->allowMockingMethodsUnnecessarily(true);
+
+		$classStr = $key = $class;
+
+		if ( ! empty($methods))
+		{
+			$classStr .= '[' . implode(',', $methods) . ']';
+		}
+
+		//what jackass doesn't built an optional constructor param without a default?
+		if ($class == 'CI_DB_driver' || $class == 'CI_DB_active_record')
+		{
+			$obj = \Mockery::mock($class . '_mock', $this->ARMethods);
+		}
+		else
+		{
+			$obj = \Mockery::mock($classStr);
+		}
+
+
+		//store ref at key
+		$this->mockList[$key] = & $obj;
 
 		return $obj;
 	}
@@ -392,9 +482,18 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 
 		foreach ($this->activeRecordMethods AS $method)
 		{
-			$obj->expects($this->any())
-				->method($method)
-				->will($this->returnSelf());
+			if ($this->useMockery)
+			{
+				$obj->shouldReceive($method)
+					->andReturn(\Mockery::self())
+					->zeroOrMoreTimes();
+			}
+			else
+			{
+				$obj->expects($this->any())
+					->method($method)
+					->will($this->returnSelf());
+			}
 		}
 
 		return $this;
