@@ -47,9 +47,9 @@ require_once APPPATH .'libraries/Layout.php';
 require_once APPPATH .'libraries/Session.php';
 require_once APPPATH .'libraries/Template.php';
 
-require_once realpath(rtrim(dirname(__FILE__), '/') . '/testee_equal_without_whitespace_expectation.php');
-require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/unit_tester.php');
-require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/mock_objects.php');
+require_once 'testee_equal_without_whitespace_expectation.php';
+require_once PATH_THIRD . '/testee/vendor/simpletest/unit_tester.php';
+require_once PATH_THIRD . '/testee/vendor/simpletest/mock_objects.php';
 
 class Testee_unit_test_case extends UnitTestCase
 {

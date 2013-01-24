@@ -8,7 +8,7 @@
  * @package   Testee
  */
 
-require_once realpath(rtrim(dirname(__FILE__), '/') . '/../../vendor/simpletest/scorer.php');
+require_once PATH_THIRD . '/testee/vendor/simpletest/scorer.php';
 require_once dirname(__FILE__) .'/testee_test_result.php';
 
 class Testee_reporter extends SimpleReporter {
