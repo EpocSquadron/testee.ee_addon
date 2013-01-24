@@ -14,7 +14,7 @@ class Testee_phpunit_reporter extends PHPUnit_TextUI_ResultPrinter
 {
 	protected function printHeader()
 	{
-		echo "<pre>";
+		echo "<pre style='word-wrap:break-word;'>";
 		parent::printHeader();
 	}
 
