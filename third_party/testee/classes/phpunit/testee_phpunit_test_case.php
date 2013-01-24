@@ -1,11 +1,12 @@
 <?php
 
 /**
- * Base Testee unit test case.
+ * Base PHPUnit Testee unit test case.
  *
- * @author        Stephen Lewis (http://github.com/experience/)
- * @copyright     Experience Internet
- * @package       Testee
+ * @author		Stephen Lewis (http://github.com/experience/)
+ * @author		Greg Ferrell
+ * @copyright	Experience Internet
+ * @package		Testee
  */
 
 // Classes extended by, but not 'required' by the 'mock' classes, below.
@@ -25,6 +26,8 @@ require_once BASEPATH .'database/DB_utility.php';
 //in theory this would never be hit, but you never know.
 if ( ! class_exists('CI_DB'))
 {
+	//this has to be evaled otherwise class declaration runs
+	//before the if statement. Thanks, PHP :D
 	eval('class CI_DB extends CI_DB_active_record { }');
 }
 
@@ -60,6 +63,36 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 * @see	__construct
 	 */
 	protected $EE;
+
+
+	/**
+	 * EE libs that need to be mocked
+	 *
+	 * @var array
+	 * @see setUp
+	 */
+	protected $eeMockLibs = array(
+		'db'			=> 'CI_DB_active_record',
+		'db_query'		=> 'CI_DB_result',
+		'dbforge'		=> 'CI_DB_forge',
+		'dbutil'		=> 'CI_DB_utility',
+		'cp'			=> 'Cp',
+		'config'		=> 'EE_Config',
+		'email'			=> 'EE_Email',
+		'extensions'	=> 'EE_Extensions',
+		'functions'		=> 'EE_Functions',
+		'input'			=> 'EE_Input',
+		'javascript'	=> 'EE_Javascript',
+		'lang'			=> 'EE_Lang',
+		'loader'		=> 'EE_Loader',
+		'output'		=> 'EE_Output',
+		'session'		=> 'EE_Session',
+		'table'			=> 'EE_Table',
+		'template'		=> 'EE_Template',
+		'typography'	=> 'EE_Typography',
+		'uri'			=> 'EE_URI',
+		'layout'		=> 'Layout',
+	);
 
 
 	/**
@@ -121,6 +154,13 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 		'maps'
 	);
 
+	/**
+	 * Active record methods that need to be mocked into DB
+	 *
+	 * @var array
+	 * @see __construct
+	 */
+	protected $ARMethods = array();
 
 	/**
 	 * Mock list for retrieveale by new class name
@@ -128,6 +168,22 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 * @see buildMock
 	 */
 	protected $mockList = array();
+
+	/**
+	 * Prefix for mocks so we get no interference
+	 *
+	 * @var string
+	 * @see __construct
+	 */
+	protected $prefix	= 'mock_';
+
+	/**
+	 * Are we using mockery objects for this test?
+	 *
+	 * @var boolean
+	 * @see setUp
+	 */
+	protected $useMockery = FALSE;
 
 	// --------------------------------------------------------------------
 	//	PUBLIC METHODS
@@ -143,8 +199,14 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	{
 		$this->EE =& get_instance();
 
+		$this->prefix = get_class($this) . '_mock_';
 		//these will get all of the correct public methods
-		$this->mysqlMethods = get_class_methods('CI_DB_mysql_driver');
+		$this->mysqlMethods	= get_class_methods('CI_DB_mysql_driver');
+
+		$this->ARMethods	= array_unique(array_merge(
+			get_class_methods('CI_DB_active_record'),
+			$this->mysqlMethods
+		));
 	}
 	//END __construct
 
@@ -158,63 +220,32 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 * @return  void
 	 */
 
-	public function setUp( $use_mockery = FALSE)
+	public function setUp($useMockery = FALSE)
 	{
-		// -------------------------------------
-		// Create the mock objects. A class prefix
-		// is used to avoid 'redeclared class'
-		// errors when generating mock object classes.
-		// -------------------------------------
-
-		$prefix = get_class($this);
+		$this->useMockery = (bool) $useMockery;
 
 		// -------------------------------------
-		// TRICKY:
-		// EE's support for multiple DB drivers
-		// makes life difficult. The 'master'
-		// driver class defines a bunch of methods,
-		// but also delegates driver-specific calls
-		// to the relevant DB driver.
-		//
-		// The solution is to manually add the
-		// MySQL-specific methods to the DB
-		// mock. If you're not using MySQL,
-		// you can always sub-class this, and
-		// redefine the $mysqlMethods property.
+		//	build mocks
 		// -------------------------------------
 
-		$this->buildMock('CI_DB_active_record', $prefix .'_mock_db',
-			array_unique(array_merge(
-				get_class_methods('CI_DB_active_record'),
-				$this->mysqlMethods
-			))
-		);
+		//mockey mock and the funky bunch
+		foreach ($this->eeMockLibs as $shortName => $class)
+		{
+			//we already did this!
+			if ($shortName == 'db') continue;
 
-		// Everything else is much more straightforward.
-		$this->buildMock('CI_DB_result',	$prefix .'_mock_db_query');
-		$this->buildMock('CI_DB_forge',		$prefix .'_mock_dbforge');
-		$this->buildMock('CI_DB_utility',	$prefix .'_mock_dbutil');
-		$this->buildMock('Cp',				$prefix .'_mock_cp');
-		$this->buildMock('EE_Config',		$prefix .'_mock_config');
-		$this->buildMock('EE_Email',		$prefix .'_mock_email');
-		$this->buildMock('EE_Extensions',	$prefix .'_mock_extensions');
-		$this->buildMock('EE_Functions',	$prefix .'_mock_functions');
-		$this->buildMock('EE_Input',		$prefix .'_mock_input');
-		$this->buildMock('EE_Javascript',	$prefix .'_mock_javascript');
-		$this->buildMock('EE_Lang',			$prefix .'_mock_lang');
-		$this->buildMock('EE_Loader',		$prefix .'_mock_loader');
-		$this->buildMock('EE_Output',		$prefix .'_mock_output');
-		$this->buildMock('EE_Session',		$prefix .'_mock_session');
-		$this->buildMock('EE_Table',		$prefix .'_mock_table');
-		$this->buildMock('EE_Template',		$prefix .'_mock_template');
-		$this->buildMock('EE_Typography',	$prefix .'_mock_typography');
-		$this->buildMock('EE_URI',			$prefix .'_mock_uri');
-		$this->buildMock('Layout',			$prefix .'_mock_layout');
+			$this->buildMock($class,	$this->prefix . $shortName);
+		}
+
+		// -------------------------------------
+		//	set mocks (getMockByName returns ref)
+		// -------------------------------------
 
 		// Assign the mock objects to the EE superglobal.
 		$this->EE->config		= $this->getMockByName('config');
 		$this->EE->cp			= $this->getMockByName('cp');
-		$this->EE->db			= $this->getMockByName('db');
+		//need to get a fresh copy of this because of the special build
+		$this->EE->db			= $this->getMockByName('db', TRUE);
 		$this->EE->dbforge		= $this->getMockByName('dbforge');
 		$this->EE->email		= $this->getMockByName('email');
 		$this->EE->extensions	= $this->getMockByName('extensions');
@@ -230,9 +261,6 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 		$this->EE->template		= $this->getMockByName('template');
 		$this->EE->typography	= $this->getMockByName('typography');
 		$this->EE->uri			= $this->getMockByName('uri');
-
-		// EE compatibility layer
-		$this->initializeActiveRecordMethods();
 	}
 	//END setUp
 
@@ -284,7 +312,7 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 		$obj = $mock->getMock();
 
 		//store ref at key
-		$this->mockList[$list_key] =& $obj;
+		$this->mockList[$list_key] = & $obj;
 
 		return $obj;
 	}
@@ -296,21 +324,48 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	/**
 	 * Returns a mock object of the specified type.
 	 *
-	 * @access  protected
-	 * @param   string      $class    The class of mock object to return
-	 *                                e.g. 'db', or 'query'.
+	 * @access	protected
+	 * @param	string		$class		The class of mock object to return
+	 *									e.g. 'db', or 'query'.
+	 * @param	bool		$fresh
 	 * @return  bool|object
 	 */
-	protected function getMockByName($class = '')
-	{
-		$class_name = get_class($this) .'_mock_' .$class;
 
-		if (isset($this->mockList[$class_name]))
+	protected function getMockByName($shortName = '', $fresh = false)
+	{
+		$className = $this->prefix . $shortName;
+
+		if ($fresh)
 		{
-			return $this->mockList[$class_name];
+			//special snowflake
+			if ($shortName == 'db')
+			{
+				$obj = $this->buildMock(
+					$this->eeMockLibs[$shortName],
+					$className,
+					$this->ARMethods
+				);
+
+				$this->initializeActiveRecordMethods($obj);
+
+				return $obj;
+			}
+			else if (isset($this->eeMockLibs[$shortName]))
+			{
+				return $this->buildMock($this->eeMockLibs[$shortName], $className);
+			}
+			else
+			{
+				return false;
+			}
 		}
 
-		return FALSE;
+		if (isset($this->mockList[$className]))
+		{
+			return $this->mockList[$className];
+		}
+
+		return false;
 	}
 	//END getMockByName
 
@@ -321,19 +376,28 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 * Ensures that the 'chainable' Active Record mock methods still return a
 	 * reference to the mock DB class.
 	 *
-	 * @author Jamie Rumbelow
-	 * @author Stephen Lewis
-	 * @return void
+	 * @access	protected
+	 * @author	Jamie Rumbelow
+	 * @author	Stephen Lewis
+	 * @author	Greg Ferrell (Hey, everyone else was doing it)
+	 * @param	mixed	$obj	optionally pass an object to set AR refs on
+	 * @return	object			$this, for chaining
 	 */
-	protected function initializeActiveRecordMethods()
+	protected function initializeActiveRecordMethods($obj = null)
 	{
+		if ( ! is_object($obj))
+		{
+			$obj =& $this->EE->db;
+		}
+
 		foreach ($this->activeRecordMethods AS $method)
 		{
-			$this->EE->db
-					->expects($this->any())
-					->method($method)
-					->will($this->returnSelf());
+			$obj->expects($this->any())
+				->method($method)
+				->will($this->returnSelf());
 		}
+
+		return $this;
 	}
 	//END initializeActiveRecordMethods
 
@@ -344,12 +408,12 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 	 * exportVar makes a var export string of an included variable
 	 * for use in failure messeges for the user.
 	 *
-	 * @access	protected
+	 * @access	public
 	 * @static
 	 * @param	mixed $var	variable to export
 	 * @return	string		exported variable
 	 */
-	protected function exportVar($var)
+	public static function exportVar($var)
 	{
 		ob_start();
 

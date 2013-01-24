@@ -286,6 +286,7 @@ class Testee_mcp
 	 * @access  public
 	 * @return  void
 	 */
+
 	public function run_test()
 	{
 		$test_path = $this->EE->input->post('tests') OR ! is_array($test_path);
@@ -328,6 +329,14 @@ class Testee_mcp
 	}
 	//END run_test
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Run QUnit Test.
+	 *
+	 * @access  public
+	 * @return  string	html for test results
+	 */
 
 	public function run_qunit_test()
 	{
@@ -394,6 +403,8 @@ class Testee_mcp
 
 		return $this->view('js_tests', 'qunit_results', $vars);
 	}
+	//END run_qunit_test
+
 
 	public function qunit_test_frame()
 	{
