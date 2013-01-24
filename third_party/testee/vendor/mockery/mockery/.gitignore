@@ -1,3 +1,6 @@
 *~
 pearfarm.spec
 *.sublime-project
+library/Hamcrest/*
+composer.lock
+vendor/

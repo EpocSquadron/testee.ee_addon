@@ -20,9 +20,8 @@
  */
 
 /**
- * Ad-hoc unit tests for various scenarios reported by users
  */
-class Mockery_AdhocTest extends PHPUnit_Framework_TestCase
+class Mockery_MockTest extends PHPUnit_Framework_TestCase
 {
 
     public function setup ()
@@ -35,12 +34,15 @@ class Mockery_AdhocTest extends PHPUnit_Framework_TestCase
         $this->container->mockery_close();
     }
 
-    public function testSimplestMockCreation()
+    public function testAnonymousMockWorksWithNotAllowingMockingOfNonExistantMethods()
     {
-        $m = $this->container->mock('MockeryTest_NameOfExistingClass');
-        $this->assertTrue($m instanceof MockeryTest_NameOfExistingClass);
+        $before = \Mockery::getConfiguration()->mockingNonExistentMethodsAllowed();
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
+        $m = $this->container->mock();
+        $m->shouldReceive("test123")->andReturn(true);
+        assertThat($m->test123(), equalTo(true));
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
     }
 
 }
 
-class MockeryTest_NameOfExistingClass {}

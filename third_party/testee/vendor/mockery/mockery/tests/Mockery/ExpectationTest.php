@@ -51,6 +51,19 @@ class ExpectationTest extends PHPUnit_Framework_TestCase
         $this->mock->shouldReceive('foo');
         $this->assertNull($this->mock->foo('foo', array(), new stdClass));
     }
+
+    public function testReturnsNullIfNullIsReturnValue()
+    {
+        $this->mock->shouldReceive('foo')->andReturn(null);
+        $this->assertNull($this->mock->foo());
+    }
+
+    public function testReturnsNullForMockedExistingClassIfNullIsReturnValue()
+    {
+        $mock = $this->container->mock('MockeryTest_Foo');
+        $mock->shouldReceive('foo')->andReturn(null);
+        $this->assertNull($mock->foo());
+    }
     
     public function testReturnsSameValueForAllIfNoArgsExpectationAndNoneGiven()
     {
@@ -114,7 +127,15 @@ class ExpectationTest extends PHPUnit_Framework_TestCase
         $this->mock->shouldReceive('foo')->andReturnUndefined();
         $this->assertTrue($this->mock->foo() instanceof \Mockery\Undefined);
     }
-    
+
+    public function testReturnsValuesSetAsArray()
+    {
+        $this->mock->shouldReceive('foo')->andReturnValues(array(1,2,3));
+        $this->assertEquals(1, $this->mock->foo());
+        $this->assertEquals(2, $this->mock->foo());
+        $this->assertEquals(3, $this->mock->foo());
+    }
+
     /**
      * @expectedException OutOfBoundsException
      */
@@ -1406,7 +1427,25 @@ class ExpectationTest extends PHPUnit_Framework_TestCase
         $this->mock->shouldIgnoreMissing();
         $this->assertTrue($this->mock->g(1,2)->a()->b()->c() instanceof \Mockery\Undefined);
     }
-    
+
+    public function testShouldIgnoreMissingFluentInterface()
+    {
+        $this->assertTrue($this->mock->shouldIgnoreMissing() instanceof \Mockery\MockInterface);
+    }
+
+    public function testShouldIgnoreMissingProxiesToUndefinedAllowingToString()
+    {
+        $this->mock->shouldIgnoreMissing();
+        $string = "Method call: {$this->mock->g()}";
+        $string = "Mock: {$this->mock}";
+    }
+
+    public function testToStringMagicMethodCanBeMocked()
+    {
+        $this->mock->shouldReceive("__toString")->andReturn('dave');
+        $this->assertEquals("{$this->mock}", "dave");
+    }
+
     public function testOptionalMockRetrieval()
     {
         $m = $this->container->mock('f')->shouldReceive('foo')->with(1)->andReturn(3)->mock();
@@ -1507,6 +1546,17 @@ class ExpectationTest extends PHPUnit_Framework_TestCase
     
     /**
      * @expectedException \Mockery\Exception
+     * @expectedExceptionMessage Mockery's configuration currently forbids mocking 
+     */
+    public function testGlobalConfigMayForbidMockingNonExistentMethodsOnAutoDeclaredClasses()
+    {
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
+        $mock = $this->container->mock('SomeMadeUpClass');
+        $mock->shouldReceive('foo');
+    }
+
+    /**
+     * @expectedException \Mockery\Exception
      */
     public function testGlobalConfigMayForbidMockingNonExistentMethodsOnObjects()
     {
@@ -1588,6 +1638,37 @@ class ExpectationTest extends PHPUnit_Framework_TestCase
         $demeter = new Mockery_UseDemeter($mock);
         $this->assertSame('Spam!', $demeter->doit());
     }
+
+    /**
+     * @group issue #20 - with args in demeter chain
+     */
+    public function testMockingDemeterChainsPassesMockeryExpectationToCompositeExpectationWithArgs()
+    {
+        $mock = $this->container->mock('Mockery_Demeterowski');
+        $mock->shouldReceive('foo->bar->baz')->andReturn('Spam!');
+        $demeter = new Mockery_UseDemeter($mock);
+        $this->assertSame('Spam!', $demeter->doitWithArgs());
+    }
+
+    /**
+    * @expectedException PHPUnit_Framework_Error_Warning
+    */
+    public function testPregMatchThrowsDelimiterWarningWithXdebugScreamTurnedOn()
+    {
+        if (!extension_loaded('xdebug')) {
+            $this->markTestSkipped('ext/xdebug not installed');
+        }
+        
+        if (ini_get('xdebug.scream') == 0) {
+            $this->markTestSkipped('xdebug.scream turned off');
+        }
+        
+        $mock = $this->container->mock('foo');
+        $mock->shouldReceive('foo')->with('bar', 'baz');
+        
+        $mock->foo('spam', 'ham');
+    }
+
 }
 
 class MockeryTest_InterMethod1
@@ -1640,4 +1721,11 @@ class Mockery_UseDemeter {
     public function doit() {
         return $this->demeter->foo()->bar()->baz();
     }
+    public function doitWithArgs() {
+        return $this->demeter->foo("foo")->bar("bar")->baz("baz");
+    }
+}
+
+class MockeryTest_Foo {
+    public function foo() {}
 }

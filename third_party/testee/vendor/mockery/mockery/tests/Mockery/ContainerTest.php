@@ -68,7 +68,52 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $this->assertTrue((bool) preg_match("/Foo/", $e->getMessage()));
         }
     }
+
+    public function testNamedMockWithConstructorArgs()
+    {
+        $m = $this->container->mock("MockeryTest_ClassConstructor2[foo]", array($param1 = new stdClass()));
+        $m->shouldReceive("foo")->andReturn(123);
+        $this->assertEquals(123, $m->foo());
+        $this->assertEquals($param1, $m->getParam1());
+    }
     
+    public function testNamedMockWithConstructorArgsAndArrayDefs()
+    {
+        $m = $this->container->mock(
+            "MockeryTest_ClassConstructor2[foo]", 
+            array($param1 = new stdClass()),
+            array("foo" => 123)
+        );
+        $this->assertEquals(123, $m->foo());
+        $this->assertEquals($param1, $m->getParam1());
+    }
+
+    public function testNamedMockWithConstructorArgsWithInternalCallToMockedMethod()
+    {
+        $m = $this->container->mock("MockeryTest_ClassConstructor2[foo]", array($param1 = new stdClass()));
+        $m->shouldReceive("foo")->andReturn(123);
+        $this->assertEquals(123, $m->bar());
+    }
+
+    public function testNamedMockWithShouldDeferMissing()
+    {
+        $m = $this->container->mock("MockeryTest_ClassConstructor2", array($param1 = new stdClass()));
+        $m->shouldDeferMissing();
+        $this->assertEquals('foo', $m->bar());
+        $m->shouldReceive("bar")->andReturn(123);
+        $this->assertEquals(123, $m->bar());
+    }
+
+    /**
+     * @expectedException BadMethodCallException
+     */
+    public function testNamedMockWithShouldDeferMissingThrowsIfNotAvailable()
+    {
+        $m = $this->container->mock("MockeryTest_ClassConstructor2", array($param1 = new stdClass()));
+        $m->shouldDeferMissing();
+        $m->foorbar123();
+    }
+
     public function testMockingAKnownConcreteClassSoMockInheritsClassType()
     {
         $m = $this->container->mock('stdClass');
@@ -173,8 +218,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     
     public function testCanMockSpl()
     {
-        $m = $this->container->mock('\\splFileObject');
-        $this->assertTrue($m instanceof \splFileObject);
+        $m = $this->container->mock('\\SplFixedArray');
+        $this->assertTrue($m instanceof \SplFixedArray);
     }
     
     public function testCanMockInterfaceWithAbstractMethod()
@@ -617,7 +662,73 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         //$this->assertTrue(\Mockery::self() instanceof MockeryTestFoo);
         \Mockery::resetContainer();
     }
+
+    /**
+     * @issue issue/89
+     */
+    public function testCreatingMockOfClassWithExistingToStringMethodDoesntCreateClassWithTwoToStringMethods()
+    {
+        \Mockery::setContainer($this->container);
+        $m = $this->container->mock('MockeryTest_WithToString'); // this would fatal
+        $m->shouldReceive("__toString")->andReturn('dave');
+        $this->assertEquals("dave", "$m");
+    }
     
+    public function testGetExpectationCount_freshContainer()
+    {
+        $this->assertEquals(0, $this->container->mockery_getExpectationCount());
+    }
+    
+    public function testGetExpectationCount_simplestMock()
+    {
+        $m = $this->container->mock();
+        $m->shouldReceive('foo')->andReturn('bar');
+        $this->assertEquals(1, $this->container->mockery_getExpectationCount());
+    }
+
+    public function testMethodsReturningParamsByReferenceDoesNotErrorOut()
+    {
+        $this->container->mock('MockeryTest_ReturnByRef'); 
+    }
+
+    public function testMockCallableTypeHint()
+    {
+		if(PHP_VERSION_ID >= 50400) {
+        	$this->container->mock('MockeryTest_MockCallableTypeHint');
+		}
+    }
+
+    public function testCanMockClassWithReservedWordMethod()
+    {
+        if (!extension_loaded("redis")) {
+            $this->markTestSkipped(
+                "phpredis not installed"
+            );;
+        }
+
+        $this->container->mock("Redis");
+    }
+
+    public function testUndeclaredClassIsDeclared()
+    {
+        $this->assertFalse(class_exists("BlahBlah"));
+        $mock = $this->container->mock("BlahBlah");
+        $this->assertInstanceOf("BlahBlah", $mock);
+    }
+
+    public function testUndeclaredClassWithNamespaceIsDeclared()
+    {
+        $this->assertFalse(class_exists("MyClasses\Blah\BlahBlah"));
+        $mock = $this->container->mock("MyClasses\Blah\BlahBlah");
+        $this->assertInstanceOf("MyClasses\Blah\BlahBlah", $mock);
+    }
+
+    public function testUndeclaredClassWithNamespaceIncludingLeadingOperatorIsDeclared()
+    {
+        $this->assertFalse(class_exists("\MyClasses\DaveBlah\BlahBlah"));
+        $mock = $this->container->mock("\MyClasses\DaveBlah\BlahBlah");
+        $this->assertInstanceOf("\MyClasses\DaveBlah\BlahBlah", $mock);
+    }
 }
 
 class MockeryTest_IssetMethod
@@ -675,7 +786,11 @@ class MockeryTest_ClassConstructor {
 }
 
 class MockeryTest_ClassConstructor2 {
-    public function __construct(stdClass $param1) {}
+    protected $param1;
+    public function __construct(stdClass $param1) { $this->param1 = $param1; }
+    public function getParam1() { return $this->param1; }
+    public function foo() { return 'foo'; }
+    public function bar() { return $this->foo(); }
 }
 
 class MockeryTest_Call1 {
@@ -722,6 +837,14 @@ class MockeryTestBar1 {
     }
 }
 
+class MockeryTest_ReturnByRef {
+    public $i = 0;
+    public function &get()
+    {
+        return $this->$i;
+    }
+}
+
 class MockeryTest_MethodParamRef {
     public function method1(&$foo){return true;}
 }
@@ -755,3 +878,15 @@ abstract class MockeryTest_PartialAbstractClass2 {
 }
 
 class MockeryTest_TestInheritedType {}
+
+if(PHP_VERSION_ID >= 50400) {
+    class MockeryTest_MockCallableTypeHint {
+        public function foo(callable $baz) {$baz();}
+        public function bar(callable $callback = null) {$callback();}
+    }
+}
+
+class MockeryTest_WithToString {
+    public function __toString() {}
+}
+

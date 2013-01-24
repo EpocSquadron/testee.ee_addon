@@ -7,11 +7,15 @@ test double framework with a succint API capable of clearly defining all possibl
 object operations and interactions using a human readable Domain Specific Language
 (DSL). Designed as a drop in alternative to PHPUnit's phpunit-mock-objects library,
 Mockery is easy to integrate with PHPUnit and can operate alongside
-phpunit-mock-objects without the World ending. 
+phpunit-mock-objects without the World ending.
+
+
 
 Mockery is released under a New BSD License.
 
 The current stable version is Mockery 0.7.2.
+The build status of the current master branch is tracked by Travis CI:
+[![Build Status](https://secure.travis-ci.org/padraic/mockery.png)](http://travis-ci.org/padraic/mockery)
 
 Mock Objects
 ------------
@@ -281,6 +285,13 @@ overridden by Mockery. This form of "partial mock" can be applied to any class
 or abstract class (e.g. mocking abstract methods where a concrete implementation
 does not exist yet).
 
+    $mock = \Mockery::mock("MyNamespace\MyClass[foo]", array($arg1, $arg2));
+
+If Mockery encounters an indexed array as the second or third argument, it will
+assume they are constructor parameters and pass them when constructing the mock
+object. The syntax above will create a new partial mock, particularly useful if
+method `bar` calls method `foo` internally with `$this->foo()`.
+
     $mock = \Mockery::mock(new Foo);
     
 Passing any real object into Mockery will create a partial mock. Partials assume
@@ -300,7 +311,8 @@ At times, you will discover that expectations on a mock include methods which ne
 
     $mock = \Mockery::mock('BazIterator')
         ->shouldReceive('next')
-        ->andReturn(\Mockery::self());
+        ->andReturn(\Mockery::self())
+        ->mock();
 
 The above class being mocked, as the next() method suggests, is an iterator. In many cases, you can replace all the iterated elements (since they are the same type many times) with just the one mock object which is programmed to act as discrete iterated elements.
 
@@ -365,8 +377,14 @@ Sets a value to be returned from the expected method call.
     andReturn(value1, value2, ...)
     
 Sets up a sequence of return values or closures. For example, the first call will return
-value1 and the second value2. Not that all subsequent calls to a mocked method
+value1 and the second value2. Note that all subsequent calls to a mocked method
 will always return the final value (or the only value) given to this declaration.
+
+    andReturns(array)
+    
+Alternative syntax for andReturn() that accepts a simple array instead of a list of parameters.
+The order of return is determined by the numerical index of the given array with the last array
+member being return on all calls once previous return values are exhausted.
 
     andReturnUsing(closure, ...)
     
@@ -460,12 +478,12 @@ replace the previously defined default. This is useful so you can setup default
 mocks in your unit test setup() and later tweak them in specific tests as
 needed.
 
-    mock()
+    getMock()
     
 Returns the current mock object from an expectation chain. Useful where
 you prefer to keep mock setups as a single statement, e.g.
     
-    $mock = \Mockery::mock('foo')->shouldReceive('foo')->andReturn(1)->mock();
+    $mock = \Mockery::mock('foo')->shouldReceive('foo')->andReturn(1)->getMock();
 
     
 Argument Validation
@@ -634,6 +652,24 @@ How this works, is that you can define mocks with default expectations. Then,
 in a later unit test, you can add or fine-tune expectations for that
 specific test. Any expectation can be set as a default using the byDefault()
 declaration.
+
+Creating Passive Mocks
+----------------------
+
+If you want your mocks to act more like a stub out of the box, you can use the
+`shouldIgnoreMissing` method. This forces the mock to return a
+`Mockery\Undefined` object for any method call. This can be useful for setting
+up mocks in your setup methods, that wont necessarily require their behaviour
+verifying in every test in your test class.
+
+Creating Passive Partial Mocks
+------------------------------
+
+Another useful scenario, in the instance where you may need to mock a call to an
+internal method, you can create a partial mock of the SUT, passing in the
+necessary constructor arguments and then calling `shouldDeferMissing`. A mock
+created in this way should act in a similar way to if you had constructed an
+instance of the original class, until you add some expectations.
 
 Mocking Public Properties
 -------------------------

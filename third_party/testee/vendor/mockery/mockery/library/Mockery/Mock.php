@@ -46,6 +46,14 @@ class Mock implements MockInterface
     protected $_mockery_ignoreMissing = false;
     
     /**
+     * Flag to indicate whether we can defer method calls missing from our
+     * expectations
+     *
+     * @var bool
+     */
+    protected $_mockery_deferMissing = false;
+
+    /**
      * Flag to indicate whether this mock was verified
      *
      * @var bool
@@ -161,13 +169,28 @@ class Mock implements MockInterface
     /**
      * Set mock to ignore unexpected methods and return Undefined class
      *
-     * @return void
+     * @return Mock
      */
     public function shouldIgnoreMissing()
     {
         $this->_mockery_ignoreMissing = true;
+        return $this;
     }
     
+    /**
+     * Set mock to defer unexpected methods to it's parent
+     *
+     * This is particularly useless for this class, as it doesn't have a parent, 
+     * but included for completeness
+     *
+     * @return Mock
+     */
+    public function shouldDeferMissing()
+    {
+        $this->_mockery_deferMissing = true;
+        return $this;
+    }
+
     /**
      * Accepts a closure which is executed with an object recorder which proxies
      * to the partial source object. The intent being to record the
@@ -177,7 +200,7 @@ class Mock implements MockInterface
      *
      * @param Closure $closure
      */
-    public function shouldExpect(Closure $closure)
+    public function shouldExpect(\Closure $closure)
     {
         $recorder = new \Mockery\Recorder($this, $this->_mockery_partial);
         $this->_mockery_disableExpectationMatching = true;
@@ -203,7 +226,7 @@ class Mock implements MockInterface
         }
         return $this;
     }
-    
+
     /**
      * Capture calls to this mock
      */
@@ -215,13 +238,23 @@ class Mock implements MockInterface
             return $handler->call($args);
         } elseif (!is_null($this->_mockery_partial) && method_exists($this->_mockery_partial, $method)) {
             return call_user_func_array(array($this->_mockery_partial, $method), $args);
+        } elseif ($this->_mockery_deferMissing && is_callable("parent::$method")) {
+            return call_user_func_array("parent::$method", $args);
         } elseif ($this->_mockery_ignoreMissing) {
-            $return = new \Mockery\Undefined;
-            return $return;
+            $undef = new \Mockery\Undefined;
+            return call_user_func_array(array($undef, $method), $args);
         }
         throw new \BadMethodCallException(
             'Method ' . $this->_mockery_name . '::' . $method . '() does not exist on this mock object'
         );
+    }
+    
+    /**
+     * Forward calls to this magic method to the __call method
+     */
+    public function __toString()
+    {
+        return $this->__call('__toString', array());
     }
     
     /**public function __set($name, $value)
@@ -338,6 +371,20 @@ class Mock implements MockInterface
             );
         }
         $this->mockery_setCurrentOrder($order);
+    }
+    
+    /**
+     * Gets the count of expectations for this mock
+     *
+     * @return int
+     */
+    public function mockery_getExpectationCount()
+    {
+        $count = 0;
+        foreach($this->_mockery_expectations as $director) {
+            $count += $director->getExpectationCount();
+        }
+        return $count;
     }
     
     /**

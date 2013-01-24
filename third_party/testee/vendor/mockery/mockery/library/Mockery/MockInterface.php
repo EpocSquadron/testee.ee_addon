@@ -44,10 +44,17 @@ interface MockInterface
     /**
      * Set mock to ignore unexpected methods and return Undefined class
      *
-     * @return void
+     * @return Mock
      */
     public function shouldIgnoreMissing();
     
+    /**
+     * Set mock to defer unexpected methods to it's parent if possible
+     *
+     * @return Mock
+     */
+    public function shouldDeferMissing();
+
     /**
      * In the event shouldReceive() accepting an array of methods/returns
      * this method will switch them from normal expectations to default
@@ -131,6 +138,13 @@ interface MockInterface
      * @return void
      */
     public function mockery_validateOrder($method, $order);
+    
+    /**
+     * Gets the count of expectations for this mock
+     *
+     * @return int
+     */
+    public function mockery_getExpectationCount();
     
     /**
      * Return the expectations director for the given method

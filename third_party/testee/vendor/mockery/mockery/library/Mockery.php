@@ -58,6 +58,20 @@ class Mockery
         $args = func_get_args();
         return call_user_func_array(array(self::$_container, 'instanceMock'), $args);
     }
+
+    /**
+     * Static shortcut to \Mockery\Container::self()
+     *
+     * @return \Mockery\MockInterface
+     */
+    public static function self()
+    {
+        if (is_null(self::$_container)) {
+            throw new \LogicException("You have not declared any mocks yet");
+        }
+
+        return self::$_container->self();
+    }
     
     /**
      * Static shortcut to closing up and verifying all mocks in the global
@@ -318,6 +332,7 @@ class Mockery
         $names = explode('->', $arg);
         reset($names);
         if (!\Mockery::getConfiguration()->mockingNonExistentMethodsAllowed()
+        && method_exists($mock, "mockery_getMockableMethods")
         && !in_array(current($names), $mock->mockery_getMockableMethods())) {
             throw new \Mockery\Exception(
                 'Mockery\'s configuration currently forbids mocking the method '
@@ -338,7 +353,7 @@ class Mockery
             if (empty($names)) break;
             if ($needNew) {
                 $mock = $container->mock('demeter_' . $method);
-                $exp->withNoArgs()->andReturn($mock);
+                $exp->andReturn($mock);
             }
             $nextExp = function ($n) use ($mock) {return $mock->shouldReceive($n);};
         }
