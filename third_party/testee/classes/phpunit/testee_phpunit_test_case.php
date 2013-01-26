@@ -38,6 +38,7 @@ require_once APPPATH .'core/EE_Input.php';
 require_once APPPATH .'core/EE_Lang.php';
 require_once APPPATH .'core/EE_Loader.php';
 require_once APPPATH .'core/EE_Output.php';
+require_once APPPATH .'core/EE_Security.php';
 require_once APPPATH .'core/EE_URI.php';
 
 require_once PATH_FT .'EE_Fieldtype.php';
@@ -89,6 +90,7 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 		'loader'		=> 'EE_Loader',
 		'output'		=> 'EE_Output',
 		'session'		=> 'EE_Session',
+		'security'		=> 'EE_Security',
 		'table'			=> 'EE_Table',
 		'template'		=> 'EE_Template',
 		'typography'	=> 'EE_Typography',
@@ -290,6 +292,7 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 		$this->EE->load			= $this->getMockByName('loader');
 		$this->EE->output		= $this->getMockByName('output');
 		$this->EE->session		= $this->getMockByName('session');
+		$this->EE->security		= $this->getMockByName('security');
 		$this->EE->TMPL			= $this->getMockByName('template');
 		$this->EE->template		= $this->getMockByName('template');
 		$this->EE->typography	= $this->getMockByName('typography');
@@ -544,7 +547,7 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 
 	public static function callMethod($obj, $name, array $args)
 	{
-		if (class_exists('ReflectionClass'))
+		if (class_exists('\ReflectionClass'))
 		{
 			$class = new \ReflectionClass($obj);
 			$method = $class->getMethod($name);
