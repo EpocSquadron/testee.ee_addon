@@ -253,6 +253,30 @@ class TesteeSuiteRunner
 		// We capture said buffer to prevent it from being echoed directly to the
 		// screen, and return it to the caller.
 
+		// -------------------------------------
+		//	need to disable xdebug's var_dump
+		//	with html
+		// -------------------------------------
+
+		$xdebugWasOn = ini_get('xdebug.default_enable') == '1';
+
+		if ($xdebugWasOn && function_exists('xdebug_disable'))
+		{
+			xdebug_disable();
+		}
+
+		// -------------------------------------
+		//	temp disable html errors
+		// -------------------------------------
+
+		$oldHTMLErrors = ini_get('html_errors');
+
+		ini_set('html_errors', 0);
+
+		// -------------------------------------
+		//	run tests
+		// -------------------------------------
+
 		if ($this->testType == 'simpletest')
 		{
 			ob_start();
@@ -282,6 +306,17 @@ class TesteeSuiteRunner
 
 			//set CI error handler back
 			@set_error_handler('_exception_handler');
+		}
+
+		// -------------------------------------
+		//	restore xdebug and html_errors ini
+		// -------------------------------------
+
+		ini_set('html_errors', $oldHTMLErrors);
+
+		if ($xdebugWasOn && function_exists('xdebug_enable'))
+		{
+			xdebug_enable();
 		}
 
 		// Reinstate the real EE objects.
