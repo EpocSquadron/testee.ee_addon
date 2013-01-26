@@ -261,6 +261,9 @@ class TesteeSuiteRunner
 		}
 		else
 		{
+			//	need to reset the error handler for PHPUnit
+			@restore_error_handler();
+
 			$runner = new PHPUnit_TextUI_TestRunner();
 			require_once $this->testeePath . 'classes/phpunit/testee_phpunit_reporter.php';
 			$runner->setPrinter(new Testee_phpunit_reporter());
@@ -276,6 +279,9 @@ class TesteeSuiteRunner
 			ob_start();
 			$runner->doRun($testSuite);
 			$testResults = ob_get_clean();
+
+			//set CI error handler back
+			@set_error_handler('_exception_handler');
 		}
 
 		// Reinstate the real EE objects.
