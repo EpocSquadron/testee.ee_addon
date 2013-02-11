@@ -5,10 +5,31 @@ class TesteeSuiteRunner
 	/**
 	 * Copies of the real instances of EE objects during testing
 	 *
+	 * @static
 	 * @var object
 	 * @see runTests
 	 */
-	static public $real;
+	public static $real;
+
+	/**
+	 * Xdebug was on?
+	 * Used when disabling xdebug output to re-enable later
+	 *
+	 * @see disableHTMLErrors
+	 * @see enableHTMLErrors
+	 * @var boolean
+	 */
+	public static $xdebugWasOn = false;
+
+	/**
+	 * HTML errors were on?
+	 * Used when disabling html error output to re-enable later
+	 *
+	 * @see disableHTMLErrors
+	 * @see enableHTMLErrors
+	 * @var boolean
+	 */
+	public static $oldHTMLErrors = 1;
 
 	/**
 	 * path to the testee addon
@@ -253,25 +274,7 @@ class TesteeSuiteRunner
 		// We capture said buffer to prevent it from being echoed directly to the
 		// screen, and return it to the caller.
 
-		// -------------------------------------
-		//	need to disable xdebug's var_dump
-		//	with html
-		// -------------------------------------
-
-		$xdebugWasOn = ini_get('xdebug.default_enable') == '1';
-
-		if ($xdebugWasOn && function_exists('xdebug_disable'))
-		{
-			xdebug_disable();
-		}
-
-		// -------------------------------------
-		//	temp disable html errors
-		// -------------------------------------
-
-		$oldHTMLErrors = ini_get('html_errors');
-
-		ini_set('html_errors', 0);
+		static::disableHTMLErrors();
 
 		// -------------------------------------
 		//	run tests
@@ -308,16 +311,7 @@ class TesteeSuiteRunner
 			@set_error_handler('_exception_handler');
 		}
 
-		// -------------------------------------
-		//	restore xdebug and html_errors ini
-		// -------------------------------------
-
-		ini_set('html_errors', $oldHTMLErrors);
-
-		if ($xdebugWasOn && function_exists('xdebug_enable'))
-		{
-			xdebug_enable();
-		}
+		static::enableHTMLErrors();
 
 		// Reinstate the real EE objects.
 		$EE->config		= static::$real->config;
@@ -352,5 +346,66 @@ class TesteeSuiteRunner
 		return $testResults;
 	}
 	//END run_tests
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Disable html/xdedug errors for phpunit output
+	 *
+	 * @static
+	 * @access public
+	 * @return void
+	 */
+
+	public static function disableHTMLErrors()
+	{
+		// -------------------------------------
+		//	need to disable xdebug's var_dump
+		//	with html
+		// -------------------------------------
+
+		static::$xdebugWasOn = (ini_get('xdebug.default_enable') == '1');
+
+		if (static::$xdebugWasOn && function_exists('xdebug_disable'))
+		{
+			xdebug_disable();
+		}
+
+		// -------------------------------------
+		//	temp disable html errors
+		// -------------------------------------
+
+		static::$oldHTMLErrors = ini_get('html_errors');
+
+		ini_set('html_errors', 0);
+	}
+	//END disableHTMLErrors
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Enable html/xdedug errors for phpunit output
+	 *
+	 * @static
+	 * @access public
+	 * @return void
+	 */
+
+	public static function enableHTMLErrors()
+	{
+		// -------------------------------------
+		//	restore xdebug and html_errors ini
+		// -------------------------------------
+
+		ini_set('html_errors', static::$oldHTMLErrors);
+
+		if (static::$xdebugWasOn && function_exists('xdebug_enable'))
+		{
+			xdebug_enable();
+		}
+	}
+	//END enableHTMLErrors
 }
 //END RunUnitTests
