@@ -1,6 +1,7 @@
 {
 	"require": {
-		"phpunit/phpunit": "3.7.*",
+		"phpunit/phpunit": "3.*",
+		"phpunit/dbunit": "1.2.2",
 		"mockery/mockery": ">=0.7.2"
 	},
 	"config": {

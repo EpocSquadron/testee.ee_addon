@@ -300,6 +300,12 @@ class Testee_mcp
 		$this->EE->load->library('TesteeSuiteRunner');
 		$this->EE->testeesuiterunner->setTestType($test_type);
 
+		if ($test_path === FALSE)
+		{
+			$this->EE->functions->redirect($this->_base_url);
+			return;
+		}
+
 		try
 		{
 			$test_results = $this->EE->testeesuiterunner->runTests($test_path);
