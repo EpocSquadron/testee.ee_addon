@@ -11,8 +11,12 @@
 require_once realpath(dirname(__FILE__) . '/../config.php');
 require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_addon.php');
 require_once realpath(dirname(__FILE__) . '/../classes/simpletest/testee_unit_test_case.php');
-require_once realpath(dirname(__FILE__) . '/../classes/phpunit/testee_phpunit_test_case.php');
-require_once realpath(dirname(__FILE__) . '/../vendor/autoload.php');
+
+if (version_compare(PHP_VERSION, '5.3', '>='))
+{
+	require_once realpath(dirname(__FILE__) . '/../classes/phpunit/testee_phpunit_test_case.php');
+	require_once realpath(dirname(__FILE__) . '/../vendor/autoload.php');
+}
 
 class Testee_model extends CI_Model
 {

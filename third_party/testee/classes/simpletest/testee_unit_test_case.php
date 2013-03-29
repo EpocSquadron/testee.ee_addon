@@ -299,7 +299,7 @@ class Testee_unit_test_case extends UnitTestCase
 	{
 		if (class_exists('ReflectionClass'))
 		{
-			$class = new \ReflectionClass($obj);
+			$class = new ReflectionClass($obj);
 			$method = $class->getMethod($name);
 			$method->setAccessible(true);
 			return $method->invokeArgs($obj, $args);
