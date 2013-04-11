@@ -88,6 +88,12 @@ class Testee_mcp
 				'new_window'	=> TRUE
 			)
 		);
+
+		//phpunit min version
+		if (version_compare(PHP_VERSION, '5.3.2', '<'))
+		{
+			unset($this->module_menu['phpunit_tests']);
+		}
 	}
 	//END __construct
 

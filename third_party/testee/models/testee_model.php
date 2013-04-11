@@ -17,6 +17,11 @@ if (version_compare(PHP_VERSION, '5.3', '>='))
 	require_once realpath(dirname(__FILE__) . '/../classes/phpunit/testee_phpunit_test_case.php');
 	require_once realpath(dirname(__FILE__) . '/../vendor/autoload.php');
 }
+//dummy for test loader
+else
+{
+	eval('class Testee_phpunit_test_case {}');
+}
 
 class Testee_model extends CI_Model
 {
@@ -216,7 +221,7 @@ class Testee_model extends CI_Model
 					$result = $loader->load($file_path);
 					$has_tests = ! ( $result instanceof BadTestSuite);
 				}
-				else
+				else if (class_exists('PHPUnit_Framework_TestSuite'))
 				{
 					$loader = new PHPUnit_Framework_TestSuite();
 					$loader->addTestFile($file_path);
