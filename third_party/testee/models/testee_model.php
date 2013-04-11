@@ -17,7 +17,7 @@ if (version_compare(PHP_VERSION, '5.3', '>='))
 	require_once realpath(dirname(__FILE__) . '/../classes/phpunit/testee_phpunit_test_case.php');
 	require_once realpath(dirname(__FILE__) . '/../vendor/autoload.php');
 }
-//dummy for test loader
+//dummy for test loader in PHP 5.2.x and below
 else
 {
 	eval('class Testee_phpunit_test_case {}');
