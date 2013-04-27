@@ -51,7 +51,7 @@ class TesteeSuiteRunner
 	 * @var object
 	 * @see getReporter
 	 */
-	protected $reporter;
+	public $reporter;
 
 	/**
 	 * possible classes loaded by EE
@@ -128,9 +128,7 @@ class TesteeSuiteRunner
 			if ($this->testType == 'phpunit')
 			{
 				//Create a result listener or add it
-				$this->reporter = new PHPUnit_Framework_TestResult();
-				//if mockery is used
-				$this->reporter->addListener(new \Mockery\Adapter\Phpunit\TestListener());
+				$this->reporter = new PHPUnit_TextUI_ResultPrinter();
 			}
 			else
 			{
@@ -293,7 +291,7 @@ class TesteeSuiteRunner
 
 			$runner = new PHPUnit_TextUI_TestRunner();
 			require_once $this->testeePath . 'classes/phpunit/testee_phpunit_reporter.php';
-			$runner->setPrinter(new Testee_phpunit_reporter());
+			$runner->setPrinter($reporter);
 
 			//there is no way to turn off the version string
 			//except to run it manually and capture/remove

@@ -10,25 +10,26 @@
 
 require_once rtrim(realpath(dirname(__FILE__) . '/../../'), '/') . '/vendor/autoload.php';
 
-class Testee_phpunit_reporter extends PHPUnit_TextUI_ResultPrinter
+class Testee_phpunit_short_reporter extends PHPUnit_TextUI_ResultPrinter
 {
 	protected function printHeader()
 	{
-		echo "<pre style='word-wrap:break-word;'>";
 		parent::printHeader();
 	}
+
+	protected function printErrors(){}
+	protected function printFailures(){}
 
 	/**
 	 * Paints the report footer.
 	 *
-	 * @access  public
+	 * @access  protected
 	 * @param string    $test_name    The test name.
 	 * @return  void
 	 */
 	protected function printFooter(PHPUnit_Framework_TestResult $result)
 	{
 		parent::printFooter($result);
-		echo '</pre>';
 	}
 }
 /* End of file    : testee_phpunit_reporter.php */

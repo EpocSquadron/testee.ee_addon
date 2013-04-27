@@ -172,12 +172,16 @@ class Testee {
 	 */
 	public function run_phpunit_tests()
 	{
-		$req_tests = $this->EE->input->get_post('addon');
+		$req_tests		= $this->EE->input->get_post('addon');
+		$show_errors	= $this->EE->input->get_post('show_errors');
 
 		if ( $req_tests === FALSE AND REQ == 'PAGE' AND isset($this->EE->TMPL))
 		{
-			$req_tests = $this->EE->TMPL->fetch_param('addon');
+			$req_tests		= $this->EE->TMPL->fetch_param('addon', $req_tests);
+			$show_errors	= $this->EE->TMPL->fetch_param('show_errors', $show_errors);
 		}
+
+		$show_errors = $show_errors !== 'no';
 
 		$all = (trim($req_tests) == 'all');
 
@@ -242,6 +246,13 @@ class Testee {
 			$this->EE->load->library('TesteeSuiteRunner');
 
 			$this->EE->testeesuiterunner->setTestType('phpunit');
+
+			if ( ! $show_errors)
+			{
+				require_once PATH_THIRD . '/testee/classes/phpunit/testee_phpunit_short_reporter.php';
+				$this->EE->testeesuiterunner->reporter = new Testee_phpunit_short_reporter();
+			}
+
 			$result = $this->EE->testeesuiterunner->runTests($run_tests);
 		}
 		catch (Exception $e)
