@@ -24,6 +24,6 @@ class Testee_phpunit_test extends Testee_phpunit_test_case
 
 	public function test__fail__on_purpose()
 	{
-		$this->assertTrue(FALSE, 'This is failing on purpose.');
+		//$this->assertTrue(FALSE, 'This is failing on purpose.');
 	}
 }

@@ -163,6 +163,101 @@ class Testee {
 	}
 
 
+	/**
+	 * Handles the 'run_phpunit_tests' ACTion. Runs all of the available tests for the
+	 * specified add-on, and outputs the results in JSON format.
+	 *
+	 * @access  public
+	 * @return  void
+	 */
+	public function run_phpunit_tests()
+	{
+		$req_tests = $this->EE->input->get_post('addon');
+
+		if ( $req_tests === FALSE AND REQ == 'PAGE' AND isset($this->EE->TMPL))
+		{
+			$req_tests = $this->EE->TMPL->fetch_param('addon');
+		}
+
+		$all = (trim($req_tests) == 'all');
+
+		// Determine the tests to run.
+		$input_tests = array_filter(
+			explode('|', $req_tests)
+		);
+
+		if (empty($input_tests))
+		{
+			// HTTP status code 412: Precondition Failed.
+			$json = array(
+				'code' => 412,
+				'message' => $this->EE->lang->line('json_error__412')
+			);
+
+			$this->_output_json(json_encode($json), 412);
+			return;
+		}
+
+		// Guard against nonsense.
+		$input_tests = array_unique($input_tests);
+
+		// Retrieve the contents of the third-party add-ons directory.
+		$all_addons = $this->EE->testee_model->get_directory_names(PATH_THIRD);
+
+		$prefs = $this->EE->testee_model->get_prefs();
+
+		$run_tests = array();
+
+		foreach ($all_addons AS $addon)
+		{
+			if ( ! $all AND ! in_array($addon, $input_tests))
+			{
+				continue;
+			}
+
+			$test_dir_path = PATH_THIRD . $addon . '/tests';
+
+			if (isset($prefs['test_location_' . $addon]))
+			{
+				$test_dir_path = $prefs['test_location_' . $addon];
+			}
+
+			if ( ! $all_tests = $this->EE->testee_model->get_file_names($test_dir_path))
+			{
+				continue;
+			}
+
+			foreach ($all_tests AS $test)
+			{
+				if (preg_match('/^test[_|\.]([^\.]*)\.php$/i', $test, $matches))
+				{
+					$run_tests[] = $test_dir_path . '/' . $test;
+				}
+			}
+		}
+
+		// Finally, we can run the tests.
+		try
+		{
+			$this->EE->load->library('TesteeSuiteRunner');
+
+			$this->EE->testeesuiterunner->setTestType('phpunit');
+			$result = $this->EE->testeesuiterunner->runTests($run_tests);
+		}
+		catch (Exception $e)
+		{
+			// HTTP status code 500: Internal Server Error.
+			$json = array('code' => 500,
+				'message' => $this->EE->lang->line('json_error__500'));
+
+			$this->_output_json(json_encode($json), 500);
+			return;
+		}
+
+		exit($result);
+	}
+
+
 
 	/* --------------------------------------------------------------
 	 * PROTECTED METHODS
