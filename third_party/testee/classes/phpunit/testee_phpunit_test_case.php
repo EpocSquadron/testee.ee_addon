@@ -33,26 +33,33 @@ if ( ! class_exists('CI_DB'))
 
 require_once BASEPATH .'database/drivers/mysql/mysql_driver.php';
 
-require_once APPPATH .'core/EE_Config.php';
-require_once APPPATH .'core/EE_Input.php';
-require_once APPPATH .'core/EE_Lang.php';
-require_once APPPATH .'core/EE_Loader.php';
-require_once APPPATH .'core/EE_Output.php';
-require_once APPPATH .'core/EE_Security.php';
-require_once APPPATH .'core/EE_URI.php';
+$apppath = defined('EE_APPPATH') ? EE_APPPATH : APPPATH;
 
-require_once PATH_FT .'EE_Fieldtype.php';
+require_once $apppath .'core/EE_Config.php';
+require_once $apppath .'core/EE_Input.php';
+require_once $apppath .'core/EE_Lang.php';
+require_once $apppath .'core/EE_Loader.php';
+require_once $apppath .'core/EE_Output.php';
+require_once $apppath .'core/EE_Security.php';
+require_once $apppath .'core/EE_URI.php';
 
-require_once APPPATH .'libraries/Cp.php';
-require_once APPPATH .'libraries/EE_Email.php';
-require_once APPPATH .'libraries/EE_Javascript.php';
-require_once APPPATH .'libraries/EE_Table.php';
-require_once APPPATH .'libraries/EE_Typography.php';
-require_once APPPATH .'libraries/Extensions.php';
-require_once APPPATH .'libraries/Functions.php';
-require_once APPPATH .'libraries/Layout.php';
-require_once APPPATH .'libraries/Session.php';
-require_once APPPATH .'libraries/Template.php';
+require_once (defined('PATH_FT') ? PATH_FT : $apppath . 'fieldtypes/') .'EE_Fieldtype.php';
+
+require_once $apppath .'libraries/Cp.php';
+require_once $apppath .'libraries/EE_Email.php';
+require_once $apppath .'libraries/EE_Javascript.php';
+
+if (file_exists($apppath .'libraries/EE_Table.php'))
+{
+	require_once $apppath .'libraries/EE_Table.php';
+}
+
+require_once $apppath .'libraries/EE_Typography.php';
+require_once $apppath .'libraries/Extensions.php';
+require_once $apppath .'libraries/Functions.php';
+require_once $apppath .'libraries/Layout.php';
+require_once $apppath .'libraries/Session.php';
+require_once $apppath .'libraries/Template.php';
 
 //require_once dirname(__FILE__) .'/testee_equal_without_whitespace_expectation.php';
 require_once PATH_THIRD . '/testee/vendor/autoload.php';
@@ -211,6 +218,11 @@ class Testee_phpunit_test_case extends PHPUnit_Framework_TestCase
 			get_class_methods('CI_DB_active_record'),
 			$this->mysqlMethods
 		));
+
+		if ( ! class_exists('EE_Table'))
+		{
+			unset($this->eeMockLibs['table']);
+		}
 	}
 	//END __construct
 

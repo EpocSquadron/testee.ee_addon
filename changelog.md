@@ -1,3 +1,6 @@
+### Version 2.4.1
+- Fixed bugs regarding automatic updates with the EE installer.
+
 ### Version 2.4
 - Added support for PHPunit type tests.
 - Fixed a bug with saving empty preferences
