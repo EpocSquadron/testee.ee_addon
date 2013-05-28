@@ -1,5 +1,6 @@
 ### Version 2.4.1
 - Fixed bugs regarding automatic updates with the EE installer.
+- Fixed bugs with CP reporting output.
 
 ### Version 2.4
 - Added support for PHPunit type tests.

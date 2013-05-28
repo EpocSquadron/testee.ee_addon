@@ -312,9 +312,14 @@ class Testee_mcp
 			return;
 		}
 
+		require_once PATH_THIRD . 'testee/classes/phpunit/testee_phpunit_reporter.php';
+
 		try
 		{
-			$test_results = $this->EE->testeesuiterunner->runTests($test_path);
+			$test_results = $this->EE->testeesuiterunner->runTests(
+				$test_path,
+				new Testee_phpunit_reporter()
+			);
 		}
 		catch (Exception $e)
 		{
